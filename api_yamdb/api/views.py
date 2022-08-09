@@ -16,7 +16,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (ReviewAndCommentsPermission,)
 
-    def get_review(self):
+    def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
         return title.reviews.all()
 
