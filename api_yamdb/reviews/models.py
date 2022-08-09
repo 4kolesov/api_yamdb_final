@@ -58,7 +58,7 @@ class Review(models.Model):
     SCORE_CHOICES = list(zip(range(11), range(11)))
 
     title = models.ForeignKey(
-        'Title',
+        Title,
         verbose_name='Произведение',
         related_name='reviews',
         on_delete=models.CASCADE
@@ -82,10 +82,15 @@ class Review(models.Model):
         auto_now_add=True
     )
 
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Оценка'
+        verbose_name_plural = 'Оценки'
+
 
 class Comment(models.Model):
     review = models.ForeignKey(
-        'Review',
+        Review,
         verbose_name='Ревью',
         related_name='comments',
         on_delete=models.CASCADE
@@ -103,3 +108,8 @@ class Comment(models.Model):
         'Дата комментария',
         auto_now_add=True
     )
+
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
