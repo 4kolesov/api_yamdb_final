@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from .viewsets import ListCreateDeleteViewSet
-from .serializer import CategorySerializer, GenreSerializer
-from  reviews.models import Category, Genre
+from .serializer import CategorySerializer, GenreSerializer, TitleSerializer
+from  reviews.models import Category, Genre, Title
 
 
 class CategoryViewSet(ListCreateDeleteViewSet):
@@ -19,3 +19,9 @@ class GenreViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    serializer_class = TitleSerializer
+    queryset = Title.objects.all()
+
