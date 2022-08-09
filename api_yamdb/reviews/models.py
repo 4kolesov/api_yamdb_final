@@ -50,8 +50,7 @@ class Title(models.Model):
         'Genre',
         verbose_name='Жанр',
         related_name='titles',
-        blank=True,
-        null=True,
+        blank=True
     )
 
 
