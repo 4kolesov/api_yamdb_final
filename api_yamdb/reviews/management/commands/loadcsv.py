@@ -61,5 +61,5 @@ class Command(BaseCommand):
                         print(f'Запись {row["id"]} добавлена')
                     except Exception as err:
                         print(f'Какая то ошибка...{err}')
-            print('Готово вроде бы')
+            print('почти готово...')
         print('Теперь точно готово!')
