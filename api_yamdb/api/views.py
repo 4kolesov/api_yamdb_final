@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from serializer import CategorySerializer
+from .serializer import CategorySerializer
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
