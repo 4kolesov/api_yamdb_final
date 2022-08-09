@@ -22,9 +22,6 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
     'rest_framework',
-    'django_filters',
-    'api',
-    'reviews',
 ]
 
 AUTH_USER_MODEL = 'users.User'
