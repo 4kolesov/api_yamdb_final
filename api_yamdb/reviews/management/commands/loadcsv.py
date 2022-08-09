@@ -11,32 +11,39 @@ class Command(BaseCommand):
     help = 'загружает данные в БД из csv.'
 
     def handle(self, *args, **options):
-        FILES = {
-            'data/category.csv': Category,
-            'data/genre.csv': Genre,
-            'data/users.csv': User,
-            'data/titles.csv': Title,
-            'data/review.csv': Review,
-            'data/comments.csv': Comment,
-            'data/genre_title.csv': Title
+        CATEGORY = 'data/category.csv'
+        GENRE = 'data/genre.csv'
+        USER = 'data/users.csv'
+        TITLE = 'data/titles.csv'
+        REVIEW = 'data/review.csv'
+        COMMENT = 'data/comments.csv'
+        GENRE_TITLE = 'data/genre_title.csv'
+        FILE_MODEL = {
+            CATEGORY: Category,
+            GENRE: Genre,
+            USER: User,
+            TITLE: Title,
+            REVIEW: Review,
+            COMMENT: Comment,
+            GENRE_TITLE: Title
         }
-        for url, model in FILES.items():
+        for url, model in FILE_MODEL.items():
             path = f'{settings.STATICFILES_DIRS[0]}{url}'
             print(f'Начинается загрузка из {url}')
             with open(path, newline='', encoding='utf-8') as file:
                 csvfile = csv.DictReader(file, delimiter=',')
                 for row in csvfile:
                     try:
-                        if url == 'data/titles.csv':
+                        if url == TITLE:
                             cat = Category.objects.get(id=row.pop('category'))
                             model.objects.create(**row, category=cat)
-                        elif url == 'data/review.csv':
+                        elif url == REVIEW:
                             title = Title.objects.get(id=row.pop('title_id'))
                             author = User.objects.get(id=row.pop('author'))
                             model.objects.create(
                                 **row, title=title, author=author
                             )
-                        elif url == 'data/comments.csv':
+                        elif url == COMMENT:
                             review = Review.objects.get(
                                 id=row.pop('review_id')
                             )
@@ -44,7 +51,7 @@ class Command(BaseCommand):
                             model.objects.create(
                                 **row, review=review, author=author
                             )
-                        elif url == 'data/genre_title.csv':
+                        elif url == GENRE_TITLE:
                             genre = Genre.objects.get(id=row.pop('genre_id'))
                             title = Title.objects.get(id=row.pop('title_id'))
                             title.genre.add(genre)
