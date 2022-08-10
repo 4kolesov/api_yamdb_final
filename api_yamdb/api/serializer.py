@@ -2,7 +2,7 @@ from rest_framework import serializers
 import datetime
 from django.db.models import Sum
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
