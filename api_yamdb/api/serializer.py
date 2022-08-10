@@ -7,13 +7,13 @@ from reviews.models import Category, Genre, Title, Review, Comment
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        exclude = (id,)
+        exclude = ('id',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        exclude = (id,)
+        exclude = ('id',)
         model = Genre
 
 
