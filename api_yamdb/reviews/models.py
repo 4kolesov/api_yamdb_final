@@ -85,6 +85,11 @@ class Review(models.Model):
         auto_now_add=True
     )
 
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Оценка'
+        verbose_name_plural = 'Оценки'
+
 
 class Comment(models.Model):
     review = models.ForeignKey(
@@ -106,3 +111,8 @@ class Comment(models.Model):
         'Дата комментария',
         auto_now_add=True
     )
+
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
