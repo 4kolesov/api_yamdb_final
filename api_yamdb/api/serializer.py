@@ -21,6 +21,8 @@ class TitleSerializer(serializers.ModelSerializer):
     year = serializers.DecimalField(
         max_digits=4, decimal_places=0, max_value=datetime.date.today().year)
     rating = serializers.SerializerMethodField()
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
     class Meta:
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
