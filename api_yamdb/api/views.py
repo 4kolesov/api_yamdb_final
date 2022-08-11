@@ -29,6 +29,23 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
 
+    def get_queryset(self):
+        FILTER_FIELDS = {
+            'name': 'name',
+            'year': 'year',
+            'category': 'category__slug',
+            'genre': 'genre__slug'
+        }
+        fields = []
+        values = []
+        for q_field, f_field in FILTER_FIELDS.items():
+            field_val = self.request.query_params.get(q_field)
+            if field_val is not None:
+                fields.append(f_field)
+                values.append(field_val)
+        filter = dict(zip(fields, values))
+        return Title.objects.filter(**filter)
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
