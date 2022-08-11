@@ -2,7 +2,18 @@ from rest_framework import serializers
 import datetime
 from django.db.models import Sum
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, User
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+    token = serializers.CharField(max_length=255, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'token']
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
 
 
 class CategorySerializer(serializers.ModelSerializer):
