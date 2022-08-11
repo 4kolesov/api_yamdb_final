@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from .viewsets import ListCreateDeleteViewSet
 from .serializer import CategorySerializer, GenreSerializer, TitleSerializer, ReviewSerializer, CommentSerializer
-from  reviews.models import Category, Genre, Title, Review, Title
+from  reviews.models import Category, Genre, Review, Title
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from api.permissions import ReviewAndCommentsPermission
@@ -28,7 +28,6 @@ class GenreViewSet(ListCreateDeleteViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
-
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
