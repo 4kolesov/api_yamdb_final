@@ -3,7 +3,18 @@ import datetime
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
-from reviews.models import Category, Genre, Title, Review, Comment
+from reviews.models import Category, Genre, Title, Review, Comment, User
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+    token = serializers.CharField(max_length=255, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'token']
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
 
 
 class CategorySerializer(serializers.ModelSerializer):
