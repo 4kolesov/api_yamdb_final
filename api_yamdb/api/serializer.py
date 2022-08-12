@@ -49,8 +49,8 @@ class CategoryTitleField(serializers.RelatedField):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    year = serializers.DecimalField(
-        max_digits=4, decimal_places=0, max_value=datetime.date.today().year)
+    year = serializers.IntegerField(
+        min_value=0, max_value=datetime.date.today().year)
     rating = serializers.SerializerMethodField(read_only=True)
     genre = GenreTitleField(child_relation=GenreSerializer())
     category = CategoryTitleField(queryset=Category)
@@ -63,7 +63,7 @@ class TitleSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         count = obj.reviews.count()
         if count == 0:
-            return 0
+            return None
         summ = obj.reviews.aggregate(Sum('score'))
         return int(summ['score__sum']/count)
 
@@ -79,15 +79,19 @@ class TitleSerializer(serializers.ModelSerializer):
         return title
 
     def update(self, instance, validated_data):
-        genres = validated_data.pop('genre')
-        category = get_object_or_404(
-            Category, slug=validated_data.pop('category')
-        )
-        instance.genre.clear()
-        for genre_slug in genres:
-            genre = get_object_or_404(Genre, slug=genre_slug)
-            instance.genre.add(genre)
-        instance.category = category
+        if 'genre' in self.initial_data:
+            genres = validated_data.pop('genre')
+            instance.genre.clear()
+            for genre_slug in genres:
+                genre = get_object_or_404(Genre, slug=genre_slug)
+                instance.genre.add(genre)
+        if 'category' in self.initial_data:
+            category = get_object_or_404(
+                Category, slug=validated_data.pop('category')
+            )
+            instance.category = category
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
         instance.save()
         return instance
 

@@ -12,6 +12,12 @@ class Category(models.Model):
         unique=True
     )
 
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return self.name
+
 
 class Genre(models.Model):
     name = models.CharField(
@@ -22,6 +28,9 @@ class Genre(models.Model):
         'Slug',
         unique=True
     )
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return self.name
@@ -53,6 +62,9 @@ class Title(models.Model):
         verbose_name='Жанр',
         related_name='titles'
     )
+
+    class Meta:
+        ordering = ['id']
 
 
 class Review(models.Model):

@@ -9,7 +9,7 @@ from django.db import models
 class UserManager(BaseUserManager):
     """Для кастомных моделей обязателен."""
 
-    def create_user(self, username, email, password=None):
+    def create_user(self, username, email, password=None, role='user', bio=''):
         """Создает и возвращает пользователя с почтой, паролем и именем."""
         if username is None:
             raise TypeError('У пользователя должно быть уникальное имя.')
@@ -17,7 +17,12 @@ class UserManager(BaseUserManager):
             raise TypeError(
                 'У пользователя должен быть уникальный адрес электронной почты'
             )
-        user = self.model(username=username, email=self.normalize_email(email))
+        user = self.model(
+            username=username,
+            email=self.normalize_email(email),
+            role=role,
+            bio=bio
+        )
         user.set_password(password)
         user.save()
         return user

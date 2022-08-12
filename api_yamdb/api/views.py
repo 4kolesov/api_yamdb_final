@@ -1,11 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import TitleFilter
 from .viewsets import ListCreateDeleteViewSet
 from .serializer import CategorySerializer, GenreSerializer, TitleSerializer, ReviewSerializer, CommentSerializer
 from  reviews.models import Category, Genre, Review, Title
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from api.permissions import ReviewAndCommentsPermission
+from api.permissions import ReviewAndCommentsPermission, AdminPermission
 
 
 
@@ -15,6 +17,7 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
+    permission_classes = (AdminPermission,)
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
@@ -23,15 +26,20 @@ class GenreViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
+    permission_classes = (AdminPermission,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = (AdminPermission,)
     queryset = Title.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
 
-    def get_queryset(self):
+    """def get_queryset(self):
         FILTER_FIELDS = {
-            'name': 'name',
+            'name': 'name__startswith',
             'year': 'year',
             'category': 'category__slug',
             'genre': 'genre__slug'
@@ -43,9 +51,8 @@ class TitleViewSet(viewsets.ModelViewSet):
             if field_val is not None:
                 fields.append(f_field)
                 values.append(field_val)
-        filter = dict(zip(fields, values))
-        return Title.objects.filter(**filter)
-
+        return Title.objects.prefetch_related('genre').select_related('category').filter(*zip(fields, values))
+    """
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer

@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
-    'rest_framework',
+    'django_extensions',
+    'django_filters'
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -65,6 +66,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'INFO',
+            'handlers': ['console', ],
+        },
     }
 }
 
