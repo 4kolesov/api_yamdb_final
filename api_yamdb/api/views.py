@@ -50,20 +50,3 @@ class SignUpViewSet(CreateViewSet):
         message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
         send_mail('Верификация YaMDB', message, 'admin@yamdb.ru', [email])
         return serializer.save(username=user, email=email, confirmation_code=confirmation_code)
-
-
-
-# class APISignUp(generics.GenericAPIView):
-#     serializer_class = SignUpSerializer
-#
-#     def post(self, serializer):
-#         confirmation_code = generate_confirmation_code()
-#         data = self.request.data
-#         data['confirmation_code'] = confirmation_code
-#         serializer = self.serializer_class(data=data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         address = self.request.data['email']
-#         message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
-#         send_mail('Верификация YaMDB', message, 'admin@yamdb.ru', [address])
-#         return Response(serializer.data)
