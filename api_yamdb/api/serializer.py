@@ -37,7 +37,10 @@ class GenreTitleField(serializers.ManyRelatedField):
         ]
 
     def to_internal_value(self, data):
-        return data
+        obj_data = []
+        for slug in data:
+            obj_data.append(get_object_or_404(Genre, slug=slug))
+        return obj_data
 
 
 class CategoryTitleField(serializers.RelatedField):
@@ -45,7 +48,7 @@ class CategoryTitleField(serializers.RelatedField):
         return CategorySerializer(value).data
 
     def to_internal_value(self, data):
-        return data
+        return get_object_or_404(Category, slug=data)
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -66,34 +69,6 @@ class TitleSerializer(serializers.ModelSerializer):
             return None
         avg = obj.reviews.aggregate(Avg('score'))
         return avg['score__avg']
-
-    def create(self, validated_data):
-        genres = validated_data.pop('genre')
-        category = get_object_or_404(
-            Category, slug=validated_data.pop('category')
-        )
-        title = Title.objects.create(**validated_data, category=category)
-        for genre_slug in genres:
-            genre = get_object_or_404(Genre, slug=genre_slug)
-            title.genre.add(genre)
-        return title
-
-    def update(self, instance, validated_data):
-        if 'genre' in self.initial_data:
-            genres = validated_data.pop('genre')
-            instance.genre.clear()
-            for genre_slug in genres:
-                genre = get_object_or_404(Genre, slug=genre_slug)
-                instance.genre.add(genre)
-        if 'category' in self.initial_data:
-            category = get_object_or_404(
-                Category, slug=validated_data.pop('category')
-            )
-            instance.category = category
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
 
 
 class ReviewSerializer(serializers.ModelSerializer):
