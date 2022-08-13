@@ -19,6 +19,15 @@ class SignUpSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
+class TokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True)
+    confirmation_code = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'confirmation_code']
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ('id',)

@@ -7,7 +7,7 @@ from django.db import models
 
 
 class UserManager(BaseUserManager):
-    """Для кастомных моделей обязателен."""
+    """Обязательный для кастомных моделей менеджер юзеров."""
 
     def create_user(self, username, email, confirmation_code):
         """Создает и возвращает пользователя с почтой, именем и кодом."""
@@ -58,17 +58,3 @@ class User(AbstractUser):
     )
 
     objects = UserManager()
-
-
-    @property
-    def token(self):
-        return self._generate_jwt_token()
-
-    def _generate_jwt_token(self):
-        dt = datetime.now() + timedelta(days=14)
-        token = jwt.encode({
-            'id': self.pk,
-            'exp': int(dt.strftime('%s'))
-        }, settings.SECRET_KEY, algorithm='HS256')
-
-        return token.decode('utf-8')
