@@ -1,6 +1,6 @@
 from rest_framework import serializers
 import datetime
-from django.db.models import Sum
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Genre, Title, Review, Comment, User
@@ -64,8 +64,8 @@ class TitleSerializer(serializers.ModelSerializer):
         count = obj.reviews.count()
         if count == 0:
             return None
-        summ = obj.reviews.aggregate(Sum('score'))
-        return int(summ['score__sum']/count)
+        avg = obj.reviews.aggregate(Avg('score'))
+        return avg['score__avg']
 
     def create(self, validated_data):
         genres = validated_data.pop('genre')

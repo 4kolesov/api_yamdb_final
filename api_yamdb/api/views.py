@@ -36,8 +36,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-
-    """def get_queryset(self):
+    """
+    def get_queryset(self):
         FILTER_FIELDS = {
             'name': 'name__startswith',
             'year': 'year',
