@@ -9,16 +9,19 @@ from django.db import models
 class UserManager(BaseUserManager):
     """Для кастомных моделей обязателен."""
 
-    def create_user(self, username, email, password=None):
-        """Создает и возвращает пользователя с почтой, паролем и именем."""
+    def create_user(self, username, email, confirmation_code):
+        """Создает и возвращает пользователя с почтой, именем и кодом."""
         if username is None:
             raise TypeError('У пользователя должно быть уникальное имя.')
         if email is None:
             raise TypeError(
                 'У пользователя должен быть уникальный адрес электронной почты'
             )
-        user = self.model(username=username, email=self.normalize_email(email))
-        user.set_password(password)
+        user = self.model(
+            confirmation_code=confirmation_code,
+            username=username,
+            email=self.normalize_email(email)
+        )
         user.save()
         return user
 
@@ -56,13 +59,13 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+
     @property
     def token(self):
         return self._generate_jwt_token()
 
     def _generate_jwt_token(self):
-        dt = datetime.now() + timedelta(days=10)
-
+        dt = datetime.now() + timedelta(days=14)
         token = jwt.encode({
             'id': self.pk,
             'exp': int(dt.strftime('%s'))

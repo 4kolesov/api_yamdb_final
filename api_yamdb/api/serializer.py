@@ -6,11 +6,14 @@ from reviews.models import Category, Genre, Title, User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    token = serializers.CharField(max_length=255, read_only=True)
+    confirmation_code = serializers.CharField(
+        max_length=5,
+        write_only=True,
+        default=serializers.CreateOnlyDefault)
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'token']
+        fields = ['email', 'username', 'confirmation_code']
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
