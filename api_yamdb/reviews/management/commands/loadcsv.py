@@ -8,7 +8,9 @@ from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class Command(BaseCommand):
-    help = 'загружает данные в БД из csv.'
+    help = (f'Загружает данные в БД из csv.'
+            f'csv файлы должны находиться в дериктории: '
+            f'{settings.STATICFILES_DIRS[0]}')
 
     def handle(self, *args, **options):
         CATEGORY = 'data/category.csv'
@@ -30,36 +32,43 @@ class Command(BaseCommand):
         for url, model in FILE_MODEL.items():
             path = f'{settings.STATICFILES_DIRS[0]}{url}'
             print(f'Начинается загрузка из {url}')
-            with open(path, newline='', encoding='utf-8') as file:
-                csvfile = csv.DictReader(file, delimiter=',')
-                for row in csvfile:
-                    try:
-                        if url == TITLE:
-                            cat = Category.objects.get(id=row.pop('category'))
-                            model.objects.create(**row, category=cat)
-                        elif url == REVIEW:
-                            title = Title.objects.get(id=row.pop('title_id'))
-                            author = User.objects.get(id=row.pop('author'))
-                            model.objects.create(
-                                **row, title=title, author=author
-                            )
-                        elif url == COMMENT:
-                            review = Review.objects.get(
-                                id=row.pop('review_id')
-                            )
-                            author = User.objects.get(id=row.pop('author'))
-                            model.objects.create(
-                                **row, review=review, author=author
-                            )
-                        elif url == GENRE_TITLE:
-                            genre = Genre.objects.get(id=row.pop('genre_id'))
-                            title = Title.objects.get(id=row.pop('title_id'))
-                            title.genre.add(genre)
-                            title.save()
-                        else:
-                            model.objects.create(**row)
-                        print(f'Запись {row["id"]} добавлена')
-                    except Exception as err:
-                        print(f'Какая то ошибка...{err}')
-            print('почти готово...')
-        print('Теперь точно готово!')
+            try:
+                with open(path, newline='', encoding='utf-8') as file:
+                    csvfile = csv.DictReader(file, delimiter=',')
+                    for row in csvfile:
+                        try:
+                            if url == TITLE:
+                                cat = Category.objects.get(
+                                    id=row.pop('category'))
+                                model.objects.create(**row, category=cat)
+                            elif url == REVIEW:
+                                title = Title.objects.get(
+                                    id=row.pop('title_id'))
+                                author = User.objects.get(id=row.pop('author'))
+                                model.objects.create(
+                                    **row, title=title, author=author
+                                )
+                            elif url == COMMENT:
+                                review = Review.objects.get(
+                                    id=row.pop('review_id')
+                                )
+                                author = User.objects.get(id=row.pop('author'))
+                                model.objects.create(
+                                    **row, review=review, author=author
+                                )
+                            elif url == GENRE_TITLE:
+                                genre = Genre.objects.get(
+                                    id=row.pop('genre_id'))
+                                title = Title.objects.get(
+                                    id=row.pop('title_id'))
+                                title.genre.add(genre)
+                                title.save()
+                            else:
+                                model.objects.create(**row)
+                            print(f'Запись {row["id"]} добавлена')
+                        except Exception as err:
+                            print(f'Какая то ошибка...{err}')
+                print(f'Загрузка из {url} завершена.')
+            except FileNotFoundError as err:
+                print(f'Нет файла {url} в нужной дериктории: {err}')
+        print('Загрузка завершена.')
