@@ -28,6 +28,25 @@ class TokenSerializer(serializers.ModelSerializer):
         fields = ['username', 'confirmation_code']
 
 
+class UserSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+    username = serializers.CharField(required=True, max_length=150)
+    email = serializers.EmailField(required=True, max_length=254)
+    first_name = serializers.CharField(required=False, max_length=150)
+    last_name = serializers.CharField(required=False, max_length=150)
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        ]
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ('id',)

@@ -1,9 +1,9 @@
 from django.core.mail import send_mail
-from rest_framework import generics
-from rest_framework import viewsets
+from rest_framework import generics, viewsets, permissions
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import action
 
 from reviews.models import Category, Genre, Title, User
 from users.utils import generate_confirmation_code
@@ -11,8 +11,11 @@ from .serializer import (CategorySerializer,
                          GenreSerializer,
                          TitleSerializer,
                          SignUpSerializer,
-                         TokenSerializer)
-from .viewsets import CreateViewSet, ListCreateDeleteViewSet
+                         TokenSerializer,
+                         UserSerializer)
+from .viewsets import (CreateViewSet,
+                       ListCreateDeleteViewSet,
+                       UpdateRetrieveViewSet)
 
 
 class CategoryViewSet(ListCreateDeleteViewSet):
@@ -65,3 +68,32 @@ class GetTokenView(generics.GenericAPIView):
         )
         refresh = RefreshToken.for_user(user)
         return Response(str(refresh.access_token))
+
+
+class UserViewSet(UpdateRetrieveViewSet):
+    """Детали о конкретном юзере и изменение информации о себе."""
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    @action(methods=['get', 'patch'], detail=False, url_path='me')
+    def get_users_me(self, request):
+        if request.method == 'patch':
+            user = User.objects.filter(username=self.request.user)
+            serializer = self.get_serializer(user)
+            return Response(serializer.data)
+        user = User.objects.filter(username=self.request.user)
+        serializer = self.get_serializer(user, many=True)
+        return Response(serializer.data)
+
+    # @action(detail=False, url_path='me')
+    # def get_users_me(self, request):
+    #     user = User.objects.filter(username=self.request.user)
+    #     serializer = self.get_serializer(user, many=True)
+    #     return Response(serializer.data)
+
+    # @action(detail=False, url_path='me')
+    # def perform_update(self, serializer):
+    #     return serializer.save
