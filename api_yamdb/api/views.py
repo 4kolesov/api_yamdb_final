@@ -87,13 +87,3 @@ class UserViewSet(UpdateRetrieveViewSet):
         user = User.objects.filter(username=self.request.user)
         serializer = self.get_serializer(user, many=True)
         return Response(serializer.data)
-
-    # @action(detail=False, url_path='me')
-    # def get_users_me(self, request):
-    #     user = User.objects.filter(username=self.request.user)
-    #     serializer = self.get_serializer(user, many=True)
-    #     return Response(serializer.data)
-
-    # @action(detail=False, url_path='me')
-    # def perform_update(self, serializer):
-    #     return serializer.save
