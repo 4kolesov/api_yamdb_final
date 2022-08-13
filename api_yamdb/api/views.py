@@ -54,7 +54,7 @@ class SignUpViewSet(CreateViewSet):
 
 
 class GetTokenView(generics.GenericAPIView):
-    """Для выдачи токена в ответ на код и юзернейм."""
+    """Выдача токена в ответ на код подтверждения и юзернейм."""
     serializer_class = TokenSerializer
 
     def post(self, request):
