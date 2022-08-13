@@ -1,19 +1,18 @@
-from rest_framework import viewsets
+from django.core.mail import send_mail
 from rest_framework import generics
+from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from .viewsets import ListCreateDeleteViewSet
+from reviews.models import Category, Genre, Title, User
+from users.utils import generate_confirmation_code
 from .serializer import (CategorySerializer,
                          GenreSerializer,
                          TitleSerializer,
                          SignUpSerializer,
                          TokenSerializer)
-from .viewsets import CreateViewSet
-from reviews.models import Category, Genre, Title, User
-from users.utils import generate_confirmation_code
-from django.core.mail import send_mail
+from .viewsets import CreateViewSet, ListCreateDeleteViewSet
 
 
 class CategoryViewSet(ListCreateDeleteViewSet):
