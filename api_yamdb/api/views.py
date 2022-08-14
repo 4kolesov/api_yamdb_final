@@ -57,7 +57,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (ReviewAndCommentsPermission,)
+    #permission_classes = (ReviewAndCommentsPermission,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -71,7 +71,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (ReviewAndCommentsPermission,)
+    #permission_classes = (ReviewAndCommentsPermission,)
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']

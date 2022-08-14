@@ -30,17 +30,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class GenreTitleField(serializers.ManyRelatedField):
-    def to_representation(self, iterable):
-        return [
-            self.child_relation.to_representation(value)
-            for value in iterable
-        ]
-
     def to_internal_value(self, data):
-        obj_data = []
-        for slug in data:
-            obj_data.append(get_object_or_404(Genre, slug=slug))
-        return obj_data
+        return [get_object_or_404(Genre, slug=slug) for slug in data]
 
 
 class CategoryTitleField(serializers.RelatedField):
@@ -64,11 +55,9 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
     def get_rating(self, obj):
-        count = obj.reviews.count()
-        if count == 0:
+        if obj.reviews.count() == 0:
             return None
-        avg = obj.reviews.aggregate(Avg('score'))
-        return avg['score__avg']
+        return obj.reviews.aggregate(Avg('score'))['score__avg']
 
 
 class ReviewSerializer(serializers.ModelSerializer):
