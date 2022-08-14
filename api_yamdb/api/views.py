@@ -42,6 +42,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class SignUpViewSet(CreateViewSet):
     """Регистрация пользователя и отправка кода подтверждения на почту."""
     serializer_class = SignUpSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         return User.objects.all()
@@ -58,6 +59,7 @@ class SignUpViewSet(CreateViewSet):
 class GetTokenView(generics.GenericAPIView):
     """Выдача токена в ответ на код подтверждения и юзернейм."""
     serializer_class = TokenSerializer
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         username = self.request.data.get('username')
@@ -79,11 +81,12 @@ class UserViewSet(UpdateRetrieveViewSet):
         return User.objects.all()
 
     @action(methods=['get', 'patch'], detail=False, url_path='me')
-    def get_users_me(self, request):
-        if request.method == 'patch':
-            user = User.objects.filter(username=self.request.user)
-            serializer = self.get_serializer(user)
-            return Response(serializer.data)
+    def get_patch_users_me(self, request):
         user = User.objects.filter(username=self.request.user)
+        if request.method == 'patch':
+            serializer = self.get_serializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
         serializer = self.get_serializer(user, many=True)
         return Response(serializer.data)
