@@ -12,6 +12,13 @@ class Command(BaseCommand):
             f'csv файлы должны находиться в дериктории: '
             f'{settings.STATICFILES_DIRS[0]}')
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--clear_base',
+            action='store_true',
+            help = 'Очищает базу перед заполнением.'
+        )
+
     def handle(self, *args, **options):
         CATEGORY = 'data/category.csv'
         GENRE = 'data/genre.csv'
@@ -20,6 +27,7 @@ class Command(BaseCommand):
         REVIEW = 'data/review.csv'
         COMMENT = 'data/comments.csv'
         GENRE_TITLE = 'data/genre_title.csv'
+        MODELS = [Category, Genre, User, Title, Review, Comment]
         FILE_MODEL = {
             CATEGORY: Category,
             GENRE: Genre,
@@ -29,6 +37,13 @@ class Command(BaseCommand):
             COMMENT: Comment,
             GENRE_TITLE: Title
         }
+        for model in MODELS:
+            if options['clear_base']:
+                print(
+                    f'Удаление записей из таблицы модели: {model.__name__}'
+                )
+                model.objects.all().delete()
+
         for url, model in FILE_MODEL.items():
             path = f'{settings.STATICFILES_DIRS[0]}{url}'
             print(f'Начинается загрузка из {url}')
