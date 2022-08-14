@@ -2,8 +2,11 @@ from django.core.mail import send_mail
 from rest_framework import generics, viewsets, permissions
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+import api.permissions
 
 from reviews.models import Category, Genre, Title, User
 from users.utils import generate_confirmation_code
@@ -12,7 +15,8 @@ from .serializer import (CategorySerializer,
                          TitleSerializer,
                          SignUpSerializer,
                          TokenSerializer,
-                         UserSerializer)
+                         UserSerializer,
+                         AdminSerializer)
 from .viewsets import (CreateViewSet,
                        ListCreateDeleteViewSet,
                        UpdateRetrieveViewSet)
@@ -72,22 +76,27 @@ class GetTokenView(generics.GenericAPIView):
         return Response(str(refresh.access_token))
 
 
-class UserViewSet(UpdateRetrieveViewSet):
+class UserViewSet(ModelViewSet):
     """Детали о конкретном юзере и изменение информации о себе."""
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AdminSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = [api.permissions.AdminPermission]
 
     def get_queryset(self):
         return User.objects.all()
 
-    @action(methods=['get', 'patch'], detail=False, url_path='me')
+    @action(
+        methods=['get', 'patch'],
+        detail=False, url_path='me',
+        permission_classes=[permissions.IsAuthenticated]
+    )
     def get_patch_users_me(self, request):
         user = User.objects.filter(username=self.request.user)
         if request.method == 'PATCH':
             user = User.objects.get(username=self.request.user)
-            serializer = self.get_serializer(user, data=request.data, partial=True)
+            serializer = UserSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
-        serializer = self.get_serializer(user, many=True)
+        serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
