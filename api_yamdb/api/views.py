@@ -1,30 +1,25 @@
 from django.core.mail import send_mail
-from rest_framework import generics, viewsets, permissions
-from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from .filters import TitleFilter
-from .serializer import CategorySerializer, GenreSerializer, TitleSerializer, ReviewSerializer, CommentSerializer
 from django.shortcuts import get_object_or_404
-from api.permissions import ReviewAndCommentsPermission, AdminPermission
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, permissions, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-import api.permissions
 
-from reviews.models import Category, Genre, Title, User
+import api.permissions
+from api.permissions import AdminPermission, ReviewAndCommentsPermission
+from reviews.models import Category, Genre, Title, User, Review
 from users.utils import generate_confirmation_code
-from .serializer import (CategorySerializer,
-                         GenreSerializer,
-                         TitleSerializer,
-                         SignUpSerializer,
-                         TokenSerializer,
-                         UserSerializer,
-                         AdminSerializer)
-from .viewsets import (CreateViewSet,
-                       ListCreateDeleteViewSet,
+
+from .filters import TitleFilter
+from .serializer import (AdminSerializer, CategorySerializer,
+                         CommentSerializer, GenreSerializer, ReviewSerializer,
+                         SignUpSerializer, TitleSerializer, TokenSerializer,
+                         UserSerializer)
+from .viewsets import (CreateViewSet, ListCreateDeleteViewSet,
                        UpdateRetrieveViewSet)
 
 
@@ -49,7 +44,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
-    #permission_classes = (AdminPermission,)
+    permission_classes = (AdminPermission,)
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
@@ -74,7 +69,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    #permission_classes = (ReviewAndCommentsPermission,)
+    permission_classes = (ReviewAndCommentsPermission,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
