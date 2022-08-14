@@ -83,7 +83,8 @@ class UserViewSet(UpdateRetrieveViewSet):
     @action(methods=['get', 'patch'], detail=False, url_path='me')
     def get_patch_users_me(self, request):
         user = User.objects.filter(username=self.request.user)
-        if request.method == 'patch':
+        if request.method == 'PATCH':
+            user = User.objects.get(username=self.request.user)
             serializer = self.get_serializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
