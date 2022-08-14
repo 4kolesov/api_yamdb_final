@@ -10,15 +10,3 @@ class ListCreateDeleteViewSet(
 ):
     """Вьюсет ограниченный отображением списка, созданием и удалением."""
     pass
-
-
-class CreateViewSet(mixins.CreateModelMixin, GenericViewSet):
-    """Только создание объектов."""
-    pass
-
-
-class UpdateRetrieveViewSet(mixins.RetrieveModelMixin,
-                            mixins.UpdateModelMixin,
-                            GenericViewSet):
-    """Получение одного экземпляра и его изменение"""
-    pass

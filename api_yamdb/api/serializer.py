@@ -8,64 +8,14 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    confirmation_code = serializers.CharField(
-        max_length=5,
-        write_only=True,
-        default=serializers.CreateOnlyDefault)
+    token = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'confirmation_code']
+        fields = ['email', 'username', 'token']
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
-
-
-class TokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
-    confirmation_code = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = ['username', 'confirmation_code']
-
-
-class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True, max_length=150)
-    email = serializers.EmailField(required=True, max_length=254)
-    first_name = serializers.CharField(required=False, max_length=150)
-    last_name = serializers.CharField(required=False, max_length=150)
-    role = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = [
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-        ]
-
-
-class AdminSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(required=True)
-    username = serializers.CharField(required=True, max_length=150)
-    email = serializers.EmailField(required=True, max_length=254)
-    first_name = serializers.CharField(required=False, max_length=150)
-    last_name = serializers.CharField(required=False, max_length=150)
-
-    class Meta:
-        model = User
-        fields = [
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-        ]
 
 
 class CategorySerializer(serializers.ModelSerializer):
