@@ -16,13 +16,27 @@ class Command(BaseCommand):
         parser.add_argument(
             '--clear_base',
             action='store_true',
-            help = 'Очищает базу перед заполнением.'
+            help = 'Очищает таблицы моделей перед заполнением.'
         )
         parser.add_argument(
             '--only_err_msg',
             action='store_true',
             help = 'Выводит только основную информацию и сообщения об ошибках.'
         )
+
+    def clear_tables(self, models, err_msg=False):
+        print('Начинается очистка таблиц.')
+        for model in models:
+            if not err_msg:
+                print(
+                    f'Удаление записей из таблицы модели: {model.__name__}'
+                )
+            try:
+                model.objects.all().delete()
+            except Exception as err:
+                print(f'Ошибка при попытке удалить записи из {model.__name__}:'
+                      f' {err}')
+        print('Очистка таблиц завершена.')
 
     def handle(self, *args, **options):
         CATEGORY = 'data/category.csv'
@@ -43,14 +57,7 @@ class Command(BaseCommand):
             GENRE_TITLE: Title
         }
         if options['clear_base']:
-            print('Начинается очистка таблиц.')
-            for model in MODELS:
-                if not options['only_err_msg']:
-                    print(
-                        f'Удаление записей из таблицы модели: {model.__name__}'
-                    )
-                model.objects.all().delete()
-            print('Очистка таблиц завершена.')
+            self.clear_tables(MODELS, options['only_err_msg'])
 
         for url, model in FILE_MODEL.items():
             path = f'{settings.STATICFILES_DIRS[0]}{url}'
