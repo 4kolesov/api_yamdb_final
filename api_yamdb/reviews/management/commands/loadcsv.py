@@ -18,6 +18,11 @@ class Command(BaseCommand):
             action='store_true',
             help = 'Очищает базу перед заполнением.'
         )
+        parser.add_argument(
+            '--only_err_msg',
+            action='store_true',
+            help = 'Выводит только основную информацию и сообщения об ошибках.'
+        )
 
     def handle(self, *args, **options):
         CATEGORY = 'data/category.csv'
@@ -37,12 +42,15 @@ class Command(BaseCommand):
             COMMENT: Comment,
             GENRE_TITLE: Title
         }
-        for model in MODELS:
-            if options['clear_base']:
-                print(
-                    f'Удаление записей из таблицы модели: {model.__name__}'
-                )
+        if options['clear_base']:
+            print('Начинается очистка таблиц.')
+            for model in MODELS:
+                if not options['only_err_msg']:
+                    print(
+                        f'Удаление записей из таблицы модели: {model.__name__}'
+                    )
                 model.objects.all().delete()
+            print('Очистка таблиц завершена.')
 
         for url, model in FILE_MODEL.items():
             path = f'{settings.STATICFILES_DIRS[0]}{url}'
@@ -80,10 +88,10 @@ class Command(BaseCommand):
                                 title.save()
                             else:
                                 model.objects.create(**row)
-                            print(f'Запись {row["id"]} добавлена')
+                            if not options['only_err_msg']:
+                                print(f'Запись {row["id"]} добавлена')
                         except Exception as err:
                             print(f'Какая то ошибка...{err}')
                 print(f'Загрузка из {url} завершена.')
             except FileNotFoundError as err:
                 print(f'Нет файла {url} в нужной дериктории: {err}')
-        print('Загрузка завершена.')
