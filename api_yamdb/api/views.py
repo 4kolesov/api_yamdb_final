@@ -9,7 +9,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.permissions import AdminPermission, ReviewAndCommentsPermission
+from api.permissions import (
+    AdminPermission,
+    ForAdminPermission,
+    ReviewAndCommentsPermission)
 from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
 

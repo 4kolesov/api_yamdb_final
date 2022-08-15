@@ -15,7 +15,7 @@ class ReviewAndCommentsPermission(permissions.BasePermission):
                 or request.user.role in ['admin', 'moderator'])
 
 
-class AdminPermission(permissions.IsAuthenticatedOrReadOnly):
+class ForAdminPermission(permissions.IsAuthenticatedOrReadOnly):
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
