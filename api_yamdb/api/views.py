@@ -12,6 +12,7 @@ from api.permissions import ReviewAndCommentsPermission, AdminPermission
 
 
 class CategoryViewSet(ListCreateDeleteViewSet):
+    """Вьюсет для модели категории."""
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
     lookup_field = 'slug'
@@ -21,6 +22,7 @@ class CategoryViewSet(ListCreateDeleteViewSet):
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
+    """Вьюсет для модели жанров."""
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
     lookup_field = 'slug'
@@ -30,6 +32,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет модели произведений."""
     serializer_class = TitleSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
     #permission_classes = (AdminPermission,)
