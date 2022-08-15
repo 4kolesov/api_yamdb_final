@@ -1,13 +1,14 @@
 from django.core.mail import send_mail
 from rest_framework import generics, viewsets, permissions
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-import api.permissions
 
+
+import api.permissions
 from reviews.models import Category, Genre, Title, User
 from users.utils import generate_confirmation_code
 from .serializer import (CategorySerializer,
@@ -18,8 +19,7 @@ from .serializer import (CategorySerializer,
                          UserSerializer,
                          AdminSerializer)
 from .viewsets import (CreateViewSet,
-                       ListCreateDeleteViewSet,
-                       UpdateRetrieveViewSet)
+                       ListCreateDeleteViewSet)
 
 
 class CategoryViewSet(ListCreateDeleteViewSet):
@@ -49,7 +49,8 @@ class SignUpViewSet(CreateViewSet):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        return User.objects.all()
+        # return User.objects.all()
+        return User.objects.get_or_create()
 
     def perform_create(self, serializer):
         user = self.request.data['username']
@@ -57,7 +58,11 @@ class SignUpViewSet(CreateViewSet):
         confirmation_code = generate_confirmation_code()
         message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
         send_mail('Верификация YaMDB', message, 'admin@yamdb.ru', [email])
-        return serializer.save(username=user, email=email, confirmation_code=confirmation_code)
+        return serializer.save(
+            username=user,
+            email=email,
+            confirmation_code=confirmation_code
+        )
 
 
 class GetTokenView(generics.GenericAPIView):
@@ -77,10 +82,16 @@ class GetTokenView(generics.GenericAPIView):
 
 
 class UserViewSet(ModelViewSet):
-    """Детали о конкретном юзере и изменение информации о себе."""
+    """Юзеры для админа + детали и редактирование о себе."""
     serializer_class = AdminSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [api.permissions.AdminPermission]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        api.permissions.AdminPermission
+    ]
+    lookup_field = 'username'
+    filter_backends = [SearchFilter]
+    search_fields = ['username']
 
     def get_queryset(self):
         return User.objects.all()
@@ -91,12 +102,12 @@ class UserViewSet(ModelViewSet):
         permission_classes=[permissions.IsAuthenticated]
     )
     def get_patch_users_me(self, request):
-        user = User.objects.filter(username=self.request.user)
+        user = User.objects.get(username=self.request.user)
         if request.method == 'PATCH':
             user = User.objects.get(username=self.request.user)
             serializer = UserSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
-        serializer = UserSerializer(user, many=True)
+        serializer = UserSerializer(user)
         return Response(serializer.data)

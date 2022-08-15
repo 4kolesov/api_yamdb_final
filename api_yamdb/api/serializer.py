@@ -1,6 +1,8 @@
 from rest_framework import serializers
 import datetime
+from django.conf import settings
 from django.db.models import Sum
+from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Genre, Title, User
 
@@ -11,12 +13,21 @@ class SignUpSerializer(serializers.ModelSerializer):
         write_only=True,
         default=serializers.CreateOnlyDefault)
 
+    email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all, message='Email должен быть уникальный!')])
+
     class Meta:
         model = User
         fields = ['email', 'username', 'confirmation_code']
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Username не может быть "me"'
+            )
+        return value
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -33,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, max_length=254)
     first_name = serializers.CharField(required=False, max_length=150)
     last_name = serializers.CharField(required=False, max_length=150)
-    role = serializers.CharField(read_only=True)
+    role = serializers.ChoiceField(choices=settings.ROLES_CHOICES, read_only=True)
 
     class Meta:
         model = User
@@ -48,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AdminSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(required=True)
+    role = serializers.ChoiceField(choices=settings.ROLES_CHOICES, required=False)
     username = serializers.CharField(required=True, max_length=150)
     email = serializers.EmailField(required=True, max_length=254)
     first_name = serializers.CharField(required=False, max_length=150)
