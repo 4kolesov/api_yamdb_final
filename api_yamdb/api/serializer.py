@@ -65,7 +65,6 @@ class AdminSerializer(serializers.ModelSerializer):
         required=True,
         max_length=150
     )
-    # email = serializers.EmailField(required=True, max_length=254)
     email = serializers.EmailField(
         validators=[UniqueValidator(
             queryset=User.objects.all(),
