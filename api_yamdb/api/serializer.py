@@ -34,12 +34,9 @@ class GenreTitleField(serializers.ManyRelatedField):
         return [get_object_or_404(Genre, slug=slug) for slug in data]
 
 
-class CategoryTitleField(serializers.RelatedField):
+class CategoryTitleField(serializers.SlugRelatedField):
     def to_representation(self, value):
         return CategorySerializer(value).data
-
-    def to_internal_value(self, data):
-        return get_object_or_404(Category, slug=data)
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -47,7 +44,8 @@ class TitleSerializer(serializers.ModelSerializer):
         min_value=0, max_value=datetime.date.today().year)
     rating = serializers.SerializerMethodField(read_only=True)
     genre = GenreTitleField(child_relation=GenreSerializer())
-    category = CategoryTitleField(queryset=Category)
+    category = CategoryTitleField(
+        queryset=Category.objects.all(), slug_field='slug')
     class Meta:
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
