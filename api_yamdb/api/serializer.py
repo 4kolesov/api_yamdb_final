@@ -1,13 +1,15 @@
-from rest_framework import serializers
 import datetime
+
+from django.conf import settings
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from .fields import (ToSerializerInSlugRelatedField,
-                     ToSerializerInSlugManyRelatedField)
-from django.conf import settings
+from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Genre, Title, Review, Comment, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
+
+from .fields import (ToSerializerInSlugManyRelatedField,
+                     ToSerializerInSlugRelatedField)
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -146,7 +148,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             Title, id=self.context.get('view').kwargs.get('title_id')
         )
 
-    def validate_review(self, data):
+    def validate(self, data):
         if (
             Review.objects.filter(
                 author=self.context.get('request').user, title=self.get_title()
