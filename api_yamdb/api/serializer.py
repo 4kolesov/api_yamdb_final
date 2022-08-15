@@ -67,16 +67,24 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        fields = ['id', 'text', 'author', 'score', 'pub_date']
         model = Review
-        fields = '__all__'
 
-    def validate(self, data):
-        review_exists= Review.objects.filter(
-            author=self.context['request'].user,
-            title=self.context['view'].kwargs.get('title_id')).exists()
-        if review_exists and self.context['request'].method == 'POST':
+    def get_title(self):
+        return get_object_or_404(
+            Title, id=self.context.get('view').kwargs.get('title_id')
+        )
+
+    def validate_review(self, data):
+        if (
+            Review.objects.filter(
+                author=self.context.get('request').user, title=self.get_title()
+            ).exists()
+            and self.context.get('request').method != 'PATCH'
+        ):
             raise serializers.ValidationError(
-                'Ошибка. Можно оставить только один отзыв.')
+                "Нельзя оставить отзыв на одно произведение дважды"
+            )
         return data
 
 
@@ -87,5 +95,5 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        fields = ['id', 'text', 'author', 'pub_date']
         model = Comment
-        fields = '__all__'
