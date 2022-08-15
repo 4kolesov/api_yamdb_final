@@ -86,6 +86,15 @@ class Review(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Оценка'
         verbose_name_plural = 'Оценки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            ),
+        ]
+
+    def __str__(self):
+        return self.text[:10]
 
 
 class Comment(models.Model):
@@ -113,3 +122,6 @@ class Comment(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text[:10]
