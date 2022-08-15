@@ -13,8 +13,6 @@ class SignUpSerializer(serializers.ModelSerializer):
         write_only=True,
         default=serializers.CreateOnlyDefault)
 
-    email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all, message='Email должен быть уникальный!')])
-
     class Meta:
         model = User
         fields = ['email', 'username', 'confirmation_code']
@@ -60,8 +58,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AdminSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(choices=settings.ROLES_CHOICES, required=False)
-    username = serializers.CharField(required=True, max_length=150)
-    email = serializers.EmailField(required=True, max_length=254)
+    username = serializers.CharField(
+        validators=[UniqueValidator(
+            queryset=User.objects.all(),
+            message='Email должен быть уникальный!')],
+        required=True,
+        max_length=150
+    )
+    # email = serializers.EmailField(required=True, max_length=254)
+    email = serializers.EmailField(
+        validators=[UniqueValidator(
+            queryset=User.objects.all(),
+            message='Email должен быть уникальный!')],
+        required=True,
+        max_length=254
+    )
     first_name = serializers.CharField(required=False, max_length=150)
     last_name = serializers.CharField(required=False, max_length=150)
 
