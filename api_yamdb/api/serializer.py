@@ -2,6 +2,8 @@ from rest_framework import serializers
 import datetime
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from .fields import (ToSerializerInSlugRelatedField,
+                     ToSerializerInSlugManyRelatedField)
 
 from reviews.models import Category, Genre, Title, Review, Comment, User
 
@@ -31,26 +33,21 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class GenreTitleField(serializers.ManyRelatedField):
-    """Поле отображения категорий в произведениях."""
-    def to_internal_value(self, data):
-        return [get_object_or_404(Genre, slug=slug) for slug in data]
-
-
-class CategoryTitleField(serializers.SlugRelatedField):
-    """Поле отображения категорий в произведениях."""
-    def to_representation(self, value):
-        return CategorySerializer(value).data
-
-
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор отображения и создания произведений."""
     year = serializers.IntegerField(
         min_value=0, max_value=datetime.date.today().year)
     rating = serializers.SerializerMethodField(read_only=True)
-    genre = GenreTitleField(child_relation=GenreSerializer())
-    category = CategoryTitleField(
-        queryset=Category.objects.all(), slug_field='slug')
+    genre = ToSerializerInSlugManyRelatedField(
+        child_relation=GenreSerializer(),
+        slug_field='slug',
+        queryset=Genre.objects.all()
+    )
+    category = ToSerializerInSlugRelatedField(
+        serializer=CategorySerializer,
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
     class Meta:
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
