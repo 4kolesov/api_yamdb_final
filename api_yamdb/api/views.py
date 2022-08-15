@@ -36,23 +36,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    """
-    def get_queryset(self):
-        FILTER_FIELDS = {
-            'name': 'name__startswith',
-            'year': 'year',
-            'category': 'category__slug',
-            'genre': 'genre__slug'
-        }
-        fields = []
-        values = []
-        for q_field, f_field in FILTER_FIELDS.items():
-            field_val = self.request.query_params.get(q_field)
-            if field_val is not None:
-                fields.append(f_field)
-                values.append(field_val)
-        return Title.objects.prefetch_related('genre').select_related('category').filter(*zip(fields, values))
-    """
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
