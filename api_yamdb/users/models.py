@@ -1,16 +1,16 @@
 from datetime import datetime, timedelta
-import jwt
 
+import jwt
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
 
 class UserManager(BaseUserManager):
-    """Для кастомных моделей обязателен."""
+    """Обязательный для кастомных моделей менеджер юзеров."""
 
-    def create_user(self, username, email, password=None, role='user', bio=''):
-        """Создает и возвращает пользователя с почтой, паролем и именем."""
+    def create_user(self, username, email, confirmation_code=11, password=None, role='user', bio=''):
+        """Создает и возвращает пользователя с почтой, именем и кодом."""
         if username is None:
             raise TypeError('У пользователя должно быть уникальное имя.')
         if email is None:
@@ -18,12 +18,10 @@ class UserManager(BaseUserManager):
                 'У пользователя должен быть уникальный адрес электронной почты'
             )
         user = self.model(
+            confirmation_code=confirmation_code,
             username=username,
-            email=self.normalize_email(email),
-            role=role,
-            bio=bio
+            email=self.normalize_email(email)
         )
-        user.set_password(password)
         user.save()
         return user
 
