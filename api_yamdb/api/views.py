@@ -1,6 +1,7 @@
 from django.core.mail import send_mail
-from rest_framework import generics, viewsets, permissions
-from rest_framework.decorators import action
+from django.conf import settings
+from rest_framework import generics, viewsets, permissions, status
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -43,21 +44,36 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
 
 
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def signup_user(request):
+    """Регистрация пользователя, генерирование и отправка код подтверждения."""
+    serializer = SignUpSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        user, stat = User.objects.get_or_create(**serializer.validated_data)
+        confirmation_code = default_token_generator.make_token(user)
+        print(confirmation_code)
+        message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
+        send_mail('Верификация YaMDB', message, settings.ADMIN_EMAIL, user.email)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class SignUpViewSet(CreateViewSet):
     """Регистрация пользователя и отправка кода подтверждения на почту."""
     serializer_class = SignUpSerializer
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        # return User.objects.all()
-        return User.objects.get_or_create()
+        return User.objects.all()
+        # return User.objects.get_or_create()
 
     def perform_create(self, serializer):
         user = self.request.data['username']
         email = self.request.data['email']
         confirmation_code = generate_confirmation_code()
         message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
-        send_mail('Верификация YaMDB', message, 'admin@yamdb.ru', [email])
+        send_mail('Верификация YaMDB', message, settings.ADMIN_EMAIL, [email])
         return serializer.save(
             username=user,
             email=email,

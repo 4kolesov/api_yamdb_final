@@ -123,3 +123,5 @@ ROLES_CHOICES = (
     ('moderator', 'Модератор'),
     ('admin', 'Админ'),
 )
+
+ADMIN_EMAIL = 'admin@yamdb.ru'
