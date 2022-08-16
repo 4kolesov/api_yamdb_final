@@ -8,17 +8,10 @@ from reviews.models import Category, Genre, Title, User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    confirmation_code = serializers.CharField(
-        max_length=5,
-        write_only=True,
-        default=serializers.CreateOnlyDefault)
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'confirmation_code']
-
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        fields = ['email', 'username']
 
     def validate_username(self, value):
         if value == 'me':
@@ -29,12 +22,13 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
-    confirmation_code = serializers.CharField(write_only=True)
+    username = serializers.CharField(required=True, write_only=True)
+    confirmation_code = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = User
         fields = ['username', 'confirmation_code']
+
 
 
 class UserSerializer(serializers.ModelSerializer):
