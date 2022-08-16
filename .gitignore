@@ -147,5 +147,3 @@ dmypy.json
 
 # папки со статикой и медиа
 media/
-
-api_yamdb/reviews/migrations/0001_initial.py
