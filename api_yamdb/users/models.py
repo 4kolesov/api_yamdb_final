@@ -22,3 +22,6 @@ class User(AbstractUser):
         'Почта',
         unique=True
     )
+
+    class Meta:
+        ordering = ('pub_date',)
