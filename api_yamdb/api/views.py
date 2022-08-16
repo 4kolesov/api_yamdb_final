@@ -4,6 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import action
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import generics, viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
@@ -26,6 +27,7 @@ from .serializer import (AdminSerializer, CategorySerializer,
                          UserSerializer)
 from .viewsets import CreateViewSet, ListCreateDeleteViewSet
 
+Users = get_user_model()
 
 class CategoryViewSet(ListCreateDeleteViewSet):
     """Вьюсет для модели категории."""
@@ -100,11 +102,11 @@ def signup_user(request):
     """Регистрация пользователя, генерирование и отправка код подтверждения."""
     serializer = SignUpSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
-        user, stat = User.objects.get_or_create(**serializer.validated_data)
-        confirmation_code = default_token_generator.make_token(user)
-        print(confirmation_code)
+        confirmation_code = generate_confirmation_code()
+        user, stat = User.objects.get_or_create(
+            **serializer.validated_data, confirmation_code=confirmation_code)
         message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
-        send_mail('Верификация YaMDB', message, settings.ADMIN_EMAIL, user.email)
+        send_mail('Верификация YaMDB', message, settings.ADMIN_EMAIL, [user.email])
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -137,14 +139,15 @@ class GetTokenView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        username = self.request.data.get('username')
-        confirmation_code = self.request.data.get('confirmation_code')
-        user = User.objects.get(
-            username=username,
-            confirmation_code=confirmation_code
-        )
-        refresh = RefreshToken.for_user(user)
-        return Response(str(refresh.access_token))
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = get_object_or_404(
+                Users, username=serializer.validated_data['username'])
+            confirmation_code = self.request.data.get('confirmation_code')
+            if user.confirmation_code == confirmation_code:
+                refresh = RefreshToken.for_user(user)
+                return Response(str(refresh.access_token))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(ModelViewSet):

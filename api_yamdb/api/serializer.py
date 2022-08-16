@@ -13,14 +13,9 @@ from .fields import (ToSerializerInSlugManyRelatedField,
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    confirmation_code = serializers.CharField(
-        max_length=5,
-        write_only=True,
-        default=serializers.CreateOnlyDefault)
-
     class Meta:
         model = User
-        fields = ['email', 'username', 'confirmation_code']
+        fields = ['email', 'username']
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
