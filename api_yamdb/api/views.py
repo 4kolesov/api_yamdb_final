@@ -1,12 +1,9 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions, viewsets
-from rest_framework.decorators import action
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from rest_framework import generics, viewsets, permissions, status
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -14,10 +11,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.permissions import (
-    AdminPermission,
-    ForAdminPermission,
-    ReviewAndCommentsPermission)
+from api.permissions import (AdminPermission, ForAdminPermission,
+                             ReviewAndCommentsPermission)
 from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
 
@@ -26,9 +21,10 @@ from .serializer import (AdminSerializer, CategorySerializer,
                          CommentSerializer, GenreSerializer, ReviewSerializer,
                          SignUpSerializer, TitleSerializer, TokenSerializer,
                          UserSerializer)
-from .viewsets import CreateViewSet, ListCreateDeleteViewSet
+from .viewsets import ListCreateDeleteViewSet
 
 Users = get_user_model()
+
 
 class CategoryViewSet(ListCreateDeleteViewSet):
     """Вьюсет для модели категории."""
@@ -97,6 +93,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
         serializer.save(author=self.request.user, review=review)
 
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def signup_user(request):
@@ -109,7 +106,9 @@ def signup_user(request):
             confirmation_code=confirmation_code
         )
         message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
-        send_mail('Верификация YaMDB', message, settings.ADMIN_EMAIL, [user.email])
+        send_mail(
+            'Верификация YaMDB', message, settings.ADMIN_EMAIL, [user.email]
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -125,10 +124,9 @@ def get_token(request):
         user = get_object_or_404(User, username=username)
         if user and user.confirmation_code == confirmation_code:
             refresh = RefreshToken.for_user(user)
-            return Response(str(refresh.access_token), status=status.HTTP_200_OK)
-
-
-
+            return Response(
+                str(refresh.access_token), status=status.HTTP_200_OK
+            )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

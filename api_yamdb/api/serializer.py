@@ -1,6 +1,4 @@
-from rest_framework import serializers
 import datetime
-from django.conf import settings
 
 from django.conf import settings
 from django.db.models import Avg
@@ -37,13 +35,14 @@ class TokenSerializer(serializers.ModelSerializer):
         fields = ['username', 'confirmation_code']
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True, max_length=150)
     email = serializers.EmailField(required=True, max_length=254)
     first_name = serializers.CharField(required=False, max_length=150)
     last_name = serializers.CharField(required=False, max_length=150)
-    role = serializers.ChoiceField(choices=settings.ROLES_CHOICES, read_only=True)
+    role = serializers.ChoiceField(
+        choices=settings.ROLES_CHOICES, read_only=True
+    )
 
     class Meta:
         model = User
@@ -58,7 +57,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AdminSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(choices=settings.ROLES_CHOICES, required=False)
+    role = serializers.ChoiceField(
+        choices=settings.ROLES_CHOICES, required=False)
     username = serializers.CharField(
         validators=[UniqueValidator(
             queryset=User.objects.all(),
@@ -117,6 +117,7 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
+
     class Meta:
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
