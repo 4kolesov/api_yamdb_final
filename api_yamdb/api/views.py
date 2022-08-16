@@ -31,7 +31,7 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (AdminPermission,)
+    permission_classes = (ForAdminPermission,)
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
@@ -41,14 +41,14 @@ class GenreViewSet(ListCreateDeleteViewSet):
     lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (AdminPermission,)
+    permission_classes = (ForAdminPermission,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет модели произведений."""
     serializer_class = TitleSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = (AdminPermission,)
+    permission_classes = (ForAdminPermission,)
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
