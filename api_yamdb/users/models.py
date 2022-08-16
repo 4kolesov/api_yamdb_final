@@ -24,4 +24,4 @@ class User(AbstractUser):
     )
 
     class Meta:
-        ordering = ('pub_date',)
+        ordering = ('date_joined',)
