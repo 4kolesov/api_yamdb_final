@@ -1,7 +1,12 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, permissions, viewsets
+from rest_framework.decorators import action
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from rest_framework import generics, viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -9,39 +14,88 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
-import api.permissions
-from reviews.models import Category, Genre, Title, User
+from api.permissions import (
+    AdminPermission,
+    ForAdminPermission,
+    ReviewAndCommentsPermission)
+from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
-from .serializer import (CategorySerializer,
-                         GenreSerializer,
-                         TitleSerializer,
-                         SignUpSerializer,
-                         TokenSerializer,
-                         UserSerializer,
-                         AdminSerializer)
-from .viewsets import ListCreateDeleteViewSet
 
+from .filters import TitleFilter
+from .serializer import (AdminSerializer, CategorySerializer,
+                         CommentSerializer, GenreSerializer, ReviewSerializer,
+                         SignUpSerializer, TitleSerializer, TokenSerializer,
+                         UserSerializer)
+from .viewsets import CreateViewSet, ListCreateDeleteViewSet
+
+Users = get_user_model()
 
 class CategoryViewSet(ListCreateDeleteViewSet):
+    """Вьюсет для модели категории."""
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
     lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
+    permission_classes = (ForAdminPermission,)
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
+    """Вьюсет для модели жанров."""
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
     lookup_field = 'slug'
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
+    permission_classes = (ForAdminPermission,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет модели произведений."""
     serializer_class = TitleSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = (ForAdminPermission,)
     queryset = Title.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
 
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (ReviewAndCommentsPermission,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+
+        serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (ReviewAndCommentsPermission,)
+
+    def get_queryset(self):
+        title_id = self.kwargs['title_id']
+        review_id = self.kwargs['review_id']
+        review = get_object_or_404(
+            Review.objects.filter(title_id=title_id),
+            pk=review_id
+        )
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs['title_id']
+        review_id = self.kwargs['review_id']
+        review = get_object_or_404(
+            Review.objects.filter(title_id=title_id),
+            pk=review_id
+        )
+        serializer.save(author=self.request.user, review=review)
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
@@ -84,7 +138,7 @@ class UserViewSet(ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [
         permissions.IsAuthenticated,
-        api.permissions.AdminPermission
+        AdminPermission
     ]
     lookup_field = 'username'
     filter_backends = [SearchFilter]

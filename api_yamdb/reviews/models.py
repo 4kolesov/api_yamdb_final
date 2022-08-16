@@ -100,6 +100,12 @@ class Review(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Оценка'
         verbose_name_plural = 'Оценки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            ),
+        ]
 
 
 class Comment(models.Model):

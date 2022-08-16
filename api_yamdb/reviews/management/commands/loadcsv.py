@@ -1,10 +1,11 @@
 import csv
 
-from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management.base import BaseCommand
+from rest_framework.utils.model_meta import get_field_info
 
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class Command(BaseCommand):
@@ -65,28 +66,15 @@ class Command(BaseCommand):
             try:
                 with open(path, newline='', encoding='utf-8') as file:
                     csvfile = csv.DictReader(file, delimiter=',')
+                    relations = get_field_info(model).forward_relations
+                    rel_fields = {}
+                    for field in csvfile.fieldnames:
+                        if (field in relations and
+                                not relations[field].to_many):
+                            rel_fields[field] = relations[field].related_model
                     for row in csvfile:
                         try:
-                            if url == TITLE:
-                                cat = Category.objects.get(
-                                    id=row.pop('category'))
-                                model.objects.create(**row, category=cat)
-                            elif url == REVIEW:
-                                title = Title.objects.get(
-                                    id=row.pop('title_id'))
-                                author = User.objects.get(id=row.pop('author'))
-                                model.objects.create(
-                                    **row, title=title, author=author
-                                )
-                            elif url == COMMENT:
-                                review = Review.objects.get(
-                                    id=row.pop('review_id')
-                                )
-                                author = User.objects.get(id=row.pop('author'))
-                                model.objects.create(
-                                    **row, review=review, author=author
-                                )
-                            elif url == GENRE_TITLE:
+                            if url == GENRE_TITLE:
                                 genre = Genre.objects.get(
                                     id=row.pop('genre_id'))
                                 title = Title.objects.get(
@@ -94,6 +82,9 @@ class Command(BaseCommand):
                                 title.genre.add(genre)
                                 title.save()
                             else:
+                                for field, r_model in rel_fields.items():
+                                    row[field] = r_model.objects.get(
+                                        id=row.get(field))
                                 model.objects.create(**row)
                             if not options['only_err_msg']:
                                 print(f'Запись {row["id"]} добавлена')
