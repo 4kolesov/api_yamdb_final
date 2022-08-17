@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator
 from datetime import date
-from django.db.models import F, Q
 
 from users.models import User
 
@@ -77,7 +76,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
         constraints = (
             models.CheckConstraint(
-                check=Q(year__lte=year_max()),
+                check=models.Q(year__lte=year_max()),
                 name='year_check'
             ),
         )
