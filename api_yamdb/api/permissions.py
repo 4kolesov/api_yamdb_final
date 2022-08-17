@@ -30,10 +30,8 @@ class ForAdminPermission(permissions.IsAuthenticatedOrReadOnly):
                 )
 
 
-class AdminPermission(permissions.BasePermission):
+class AdminGetOrEditUsers(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return request.user.is_staff or request.user.role == 'admin'
-
-    def has_object_permission(self, request, view, obj):
-        return request.user.is_staff or request.user.role == 'admin'
+        return request.user.is_authenticated and request.user.is_admin
+# убрал has_object_permission, потому что этот пермишн нужен на весь вьюсет

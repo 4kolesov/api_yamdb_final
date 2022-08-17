@@ -12,7 +12,7 @@ class User(AbstractUser):
     role = models.CharField(
         'Роль',
         max_length=16,
-        default='user',
+        default=settings.DEFAUL_USER_ROLE,
         choices=settings.ROLES_CHOICES,
     )
     confirmation_code = models.CharField(
@@ -25,3 +25,14 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ('date_joined',)
+
+    @property
+    def is_admin(self):
+        return self.role == 'admin' or self.is_staff or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
+    def __str__(self):
+        return self.username

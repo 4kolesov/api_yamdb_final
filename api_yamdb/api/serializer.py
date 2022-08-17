@@ -12,11 +12,25 @@ from .fields import (ToSerializerInSlugManyRelatedField,
                      ToSerializerInSlugRelatedField)
 
 
-class SignUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(
+            queryset=User.objects.all(),
+            message='Email должен быть уникальный!')],
+        required=True,
+        max_length=254
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(
+            queryset=User.objects.all(),
+            message='Username должен быть уникальный!')],
+        required=True,
+        max_length=150
+    )
 
     class Meta:
         model = User
-        fields = ['email', 'username']
+        fields = ('email', 'username')
 
     def validate_username(self, value):
         if value == 'me':
@@ -26,43 +40,27 @@ class SignUpSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True, write_only=True)
-    confirmation_code = serializers.CharField(required=True, write_only=True)
-
-    class Meta:
-        model = User
-        fields = ['username', 'confirmation_code']
-
-
-class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True, max_length=150)
-    email = serializers.EmailField(required=True, max_length=254)
-    first_name = serializers.CharField(required=False, max_length=150)
-    last_name = serializers.CharField(required=False, max_length=150)
-    role = serializers.ChoiceField(
-        choices=settings.ROLES_CHOICES, read_only=True
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        # validators=[UniqueValidator(
+        #     queryset=User.objects.all(),
+        #     message='Такого юзера не существует')],
+        required=True,
+        write_only=True,
+        max_length=150
     )
+    confirmation_code = serializers.CharField(required=True, write_only=True, max_length=5)
 
     class Meta:
         model = User
-        fields = [
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-        ]
+        fields = ('username', 'confirmation_code',)
 
 
 class AdminSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(
-        choices=settings.ROLES_CHOICES, required=False)
     username = serializers.CharField(
         validators=[UniqueValidator(
             queryset=User.objects.all(),
-            message='Email должен быть уникальный!')],
+            message='Username должен быть уникальный!')],
         required=True,
         max_length=150
     )
@@ -73,19 +71,21 @@ class AdminSerializer(serializers.ModelSerializer):
         required=True,
         max_length=254
     )
-    first_name = serializers.CharField(required=False, max_length=150)
-    last_name = serializers.CharField(required=False, max_length=150)
 
     class Meta:
         model = User
-        fields = [
+        fields = (
             'username',
             'email',
             'first_name',
             'last_name',
             'bio',
             'role'
-        ]
+        )
+
+
+class UserSerializer(AdminSerializer):
+    role = serializers.CharField(read_only=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
