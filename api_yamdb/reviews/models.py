@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MaxValueValidator
+from .validators import MaxYear
 from datetime import date
 
 from users.models import User
@@ -48,10 +48,7 @@ class Title(models.Model):
     year = models.PositiveSmallIntegerField(
         'Год создания',
         db_index=True,
-        validators=(MaxValueValidator(
-            limit_value=year_max,
-            message='Год выпуска не может быть больше текущего'),
-        )
+        validators=(MaxYear(field='year'),)
     )
     description = models.TextField(
         'Описание',
