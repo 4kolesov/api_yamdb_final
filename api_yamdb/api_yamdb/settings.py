@@ -22,8 +22,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'users.apps.UsersConfig',
-    'api.apps.ApiConfig',
-    'reviews.apps.ReviewsConfig'
+    'reviews.apps.ReviewsConfig',
+    'api.apps.ApiConfig'
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -87,7 +87,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -124,3 +124,5 @@ ROLES_CHOICES = (
 )
 
 ADMIN_EMAIL = 'admin@yamdb.ru'
+
+DEFAUL_USER_ROLE = 'user'

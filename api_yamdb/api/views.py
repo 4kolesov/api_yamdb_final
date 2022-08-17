@@ -4,15 +4,15 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Avg
 
-from api.permissions import (AdminPermission, IsAdminOrReadOnly,
+from api.permissions import (AdminGetOrEditUsers, IsAdminOrReadOnly,
                              ReviewAndCommentsPermission)
 from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
@@ -93,12 +93,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
-@permission_classes([permissions.AllowAny])
 def signup_user(request):
     """Регистрация пользователя, генерирование и отправка код подтверждения."""
     serializer = SignUpSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        confirmation_code = generate_confirmation_code()
+    serializer.is_valid(raise_exception=True)
+    try:
+        confirmation_code = str(generate_confirmation_code())
         user, stat = User.objects.get_or_create(
             **serializer.validated_data,
             confirmation_code=confirmation_code
@@ -108,15 +108,16 @@ def signup_user(request):
             'Верификация YaMDB', message, settings.ADMIN_EMAIL, [user.email]
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as error:
+        print(f'Такой username или email уже заняты: {error}!')
 
 
 @api_view(['POST'])
-@permission_classes([permissions.AllowAny])
 def get_token(request):
     """Выдача токена в ответ на код подтверждения и юзернейм."""
     serializer = TokenSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
+    serializer.is_valid(raise_exception=True)
+    try:
         username = serializer.validated_data['username']
         confirmation_code = serializer.validated_data['confirmation_code']
         user = get_object_or_404(User, username=username)
@@ -125,28 +126,46 @@ def get_token(request):
             return Response(
                 str(refresh.access_token), status=status.HTTP_200_OK
             )
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except ValidationError as error:
+        raise ValidationError(error)
+
+    except Exception as error:
+        print(f'Отсутствуют обязательные поля для запроса токена: {error}!')
 
 
-class UserViewSet(ModelViewSet):
+
+# @api_view(['POST'])
+# def get_token(request):
+#     """Выдача токена в ответ на код подтверждения и юзернейм."""
+#     serializer = TokenSerializer(data=request.data)
+#     if serializer.is_valid(raise_exception=True):
+#         username = serializer.validated_data['username']
+#         confirmation_code = serializer.validated_data['confirmation_code']
+#         user = get_object_or_404(User, username=username)
+#         if user and user.confirmation_code == confirmation_code:
+#             refresh = RefreshToken.for_user(user)
+#             return Response(
+#                 str(refresh.access_token), status=status.HTTP_200_OK
+#             )
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
     """Юзеры для админа + детали и редактирование о себе."""
+    queryset = User.objects.all()
     serializer_class = AdminSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [
-        permissions.IsAuthenticated,
-        AdminPermission
-    ]
+    permission_classes = (
+        AdminGetOrEditUsers,
+    )
     lookup_field = 'username'
-    filter_backends = [SearchFilter]
-    search_fields = ['username']
-
-    def get_queryset(self):
-        return User.objects.all()
+    filter_backends = (SearchFilter,)
+    search_fields = ('username',)
 
     @action(
         methods=['get', 'patch'],
         detail=False, url_path='me',
-        permission_classes=[permissions.IsAuthenticated]
+        permission_classes=(permissions.IsAuthenticated,)
     )
     def get_patch_users_me(self, request):
         user = User.objects.get(username=self.request.user)
