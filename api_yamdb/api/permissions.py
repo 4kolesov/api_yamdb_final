@@ -15,15 +15,10 @@ class ReviewAndCommentsPermission(permissions.BasePermission):
                 or request.user.role in ['admin', 'moderator'])
 
 
-class ForAdminPermission(permissions.IsAuthenticatedOrReadOnly):
+class IsAdminOrReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return (request.method in permissions.SAFE_METHODS
-                or (request.user and request.user.is_authenticated
-                    and request.user.role == 'admin')
-                )
-
-    def has_object_permission(self, request, view, obj):
+        """Этот метод не лишний. Лишний тут был has_object_permission"""
         return (request.method in permissions.SAFE_METHODS
                 or (request.user and request.user.is_authenticated
                     and request.user.role == 'admin')

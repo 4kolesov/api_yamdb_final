@@ -1,10 +1,10 @@
 import datetime
 
 from django.conf import settings
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from reviews.validators import MaxYear
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -104,9 +104,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор отображения и создания произведений."""
-    year = serializers.IntegerField(
-        min_value=0, max_value=datetime.date.today().year)
-    rating = serializers.SerializerMethodField(read_only=True)
+    year = serializers.IntegerField()
+    rating = serializers.IntegerField(read_only=True)
     genre = ToSerializerInSlugManyRelatedField(
         child_relation=GenreSerializer(),
         slug_field='slug',
@@ -123,11 +122,7 @@ class TitleSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
         model = Title
-
-    def get_rating(self, obj):
-        if obj.reviews.count() == 0:
-            return None
-        return obj.reviews.aggregate(Avg('score'))['score__avg']
+        validators = (MaxYear(field='year'),)
 
 
 class ReviewSerializer(serializers.ModelSerializer):

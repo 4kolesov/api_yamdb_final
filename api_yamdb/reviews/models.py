@@ -1,11 +1,19 @@
 from django.db import models
+from django.core.validators import MaxValueValidator
+from datetime import date
+from django.db.models import F, Q
 
 from users.models import User
 
 
-class Category(models.Model):
+
+def year_max():
+    return date.today().year
+
+
+class CGAbstract(models.Model):
     name = models.CharField(
-        'Категория',
+        'Название',
         max_length=256
     )
     slug = models.SlugField(
@@ -14,27 +22,23 @@ class Category(models.Model):
     )
 
     class Meta:
-        ordering = ['id']
+        ordering = ('name',)
+        abstract = True
 
     def __str__(self):
         return self.name
 
 
-class Genre(models.Model):
-    name = models.CharField(
-        'Жанр',
-        max_length=256
-    )
-    slug = models.SlugField(
-        'Slug',
-        unique=True
-    )
+class Genre(CGAbstract):
+    class Meta(CGAbstract.Meta):
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
-    class Meta:
-        ordering = ['id']
 
-    def __str__(self):
-        return self.name
+class Category(CGAbstract):
+    class Meta(CGAbstract.Meta):
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
 class Title(models.Model):
@@ -42,10 +46,13 @@ class Title(models.Model):
         'Название',
         max_length=250,
     )
-    year = models.DecimalField(
+    year = models.PositiveSmallIntegerField(
         'Год создания',
-        max_digits=4,
-        decimal_places=0
+        db_index=True,
+        validators=(MaxValueValidator(
+            limit_value=year_max,
+            message='Год выпуска не может быть больше текущего'),
+        )
     )
     description = models.TextField(
         'Описание',
@@ -65,7 +72,15 @@ class Title(models.Model):
     )
 
     class Meta:
-        ordering = ['id']
+        ordering = ('name',)
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        constraints = (
+            models.CheckConstraint(
+                check=Q(year__lte=year_max()),
+                name='year_check'
+            ),
+        )
 
 
 class Review(models.Model):

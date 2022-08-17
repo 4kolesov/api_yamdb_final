@@ -10,8 +10,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Avg
 
-from api.permissions import (AdminPermission, ForAdminPermission,
+from api.permissions import (AdminPermission, IsAdminOrReadOnly,
                              ReviewAndCommentsPermission)
 from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
@@ -30,29 +31,26 @@ class CategoryViewSet(ListCreateDeleteViewSet):
     """Вьюсет для модели категории."""
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    lookup_field = 'slug'
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
-    permission_classes = (ForAdminPermission,)
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
     """Вьюсет для модели жанров."""
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-    lookup_field = 'slug'
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
-    permission_classes = (ForAdminPermission,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет модели произведений."""
     serializer_class = TitleSerializer
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = (ForAdminPermission,)
-    queryset = Title.objects.all()
+    http_method_names = ('get', 'post', 'patch', 'delete')
+    """В доках нет упоминания PUT запроса. Значит его не поддерживаем."""
+    permission_classes = (IsAdminOrReadOnly,)
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).order_by('name')
     filter_backends = (DjangoFilterBackend,)
+    """Фильтр используется только в данном вьюсете. 
+    Есть смысл выносить в сеттинг для всех?"""
     filterset_class = TitleFilter
 
 

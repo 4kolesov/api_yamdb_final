@@ -10,8 +10,11 @@ class ToSerializerInSlugManyRelatedField(serializers.ManyRelatedField):
         super(ToSerializerInSlugManyRelatedField, self).__init__(**kwargs)
 
     def to_internal_value(self, data):
-        return [get_object_or_404(
-            self.queryset, **{self.slug_field: slug}) for slug in data]
+        return [
+            serializers.SlugRelatedField(
+                slug_field=self.slug_field, queryset=self.queryset
+            ).to_internal_value(slug) for slug in data
+        ]
 
 
 class ToSerializerInSlugRelatedField(serializers.SlugRelatedField):
