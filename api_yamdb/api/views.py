@@ -1,8 +1,7 @@
 from rest_framework import viewsets
 from .serializer import CategorySerializer, ReviewSerializer, CommentSerializer
 from django.shortcuts import get_object_or_404
-from rest_framework.pagination import PageNumberPagination
-from api.permissions import ReviewAndCommentsPermission
+from api.permissions import ForAuthorAdminModerator
 
 from reviews.models import Review, Title
 
@@ -12,38 +11,30 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели отзывов."""
     serializer_class = ReviewSerializer
-    pagination_class = PageNumberPagination
-    permission_classes = (ReviewAndCommentsPermission,)
+    permission_classes = (ForAuthorAdminModerator,)
+
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-        return title.Reviews.all()
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели комментариев."""
     serializer_class = CommentSerializer
-    permission_classes = (ReviewAndCommentsPermission,)
+    permission_classes = (ForAuthorAdminModerator,)
+
+    def get_review(self):
+        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
 
     def get_queryset(self):
-        title_id = self.kwargs.get('title_id')
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(
-            Review.objects.filter(title_id=title_id),
-            pk=review_id
-        )
-        return review.Comments.all()
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        title_id = self.kwargs.get('title_id')
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(
-            Review.objects.filter(title_id=title_id),
-            pk=review_id
-        )
-        serializer.save(author=self.request.user, review=review)
+        serializer.save(author=self.request.user, review=self.get_review())

@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Category(models.Model):
@@ -55,8 +56,6 @@ class Title(models.Model):
 
 
 class Review(models.Model):
-    SCORE_CHOICES = list(zip(range(11), range(11)))
-
     title = models.ForeignKey(
         'Title',
         verbose_name='Произведение',
@@ -73,9 +72,13 @@ class Review(models.Model):
         related_name='reviews',
         on_delete=models.CASCADE
     )
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         'Оценка',
-        choices=SCORE_CHOICES,
+        validators=(
+            MinValueValidator(1),
+            MaxValueValidator(10)
+        ),
+        error_messages={'validators': 'Оценка от 1 до 10!'}
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
@@ -83,7 +86,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
         verbose_name = 'Оценка'
         verbose_name_plural = 'Оценки'
         constraints = [
@@ -119,7 +122,7 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
