@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -127,8 +128,12 @@ def get_token(request):
             return Response(
                 str(refresh.access_token), status=status.HTTP_200_OK
             )
+    except ValidationError as error:
+        raise ValidationError(error)
+
     except Exception as error:
         print(f'Отсутствуют обязательные поля для запроса токена: {error}!')
+
 
 
 # @api_view(['POST'])

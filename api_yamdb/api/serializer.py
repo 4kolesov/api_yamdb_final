@@ -1,6 +1,7 @@
 import datetime
 
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -10,6 +11,8 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .fields import (ToSerializerInSlugManyRelatedField,
                      ToSerializerInSlugRelatedField)
+
+from users.utils import regex_test
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -21,9 +24,14 @@ class SignUpSerializer(serializers.Serializer):
         max_length=254
     )
     username = serializers.CharField(
-        validators=[UniqueValidator(
-            queryset=User.objects.all(),
-            message='Username должен быть уникальный!')],
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9.@+-_]+$',
+            ),
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='Username должен быть уникальный!'),
+        ],
         required=True,
         max_length=150
     )
@@ -42,18 +50,17 @@ class SignUpSerializer(serializers.Serializer):
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(
-        # validators=[UniqueValidator(
-        #     queryset=User.objects.all(),
-        #     message='Такого юзера не существует')],
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9.@+-_]+$',
+            ),
+        ],
         required=True,
         write_only=True,
         max_length=150
     )
-    confirmation_code = serializers.CharField(required=True, write_only=True, max_length=5)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code',)
+    confirmation_code = serializers.CharField(
+        required=True, write_only=True, max_length=5)
 
 
 class AdminSerializer(serializers.ModelSerializer):
