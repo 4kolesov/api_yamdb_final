@@ -126,3 +126,5 @@ ROLES_CHOICES = (
 ADMIN_EMAIL = 'admin@yamdb.ru'
 
 DEFAUL_USER_ROLE = 'user'
+
+NO_REGISTER_USERNAME = 'me'

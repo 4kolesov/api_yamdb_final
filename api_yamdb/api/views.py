@@ -123,33 +123,17 @@ def get_token(request):
         username = serializer.validated_data['username']
         confirmation_code = serializer.validated_data['confirmation_code']
         user = get_object_or_404(User, username=username)
-        if user and user.confirmation_code == confirmation_code:
+        if user.confirmation_code != ' ' and user.confirmation_code == confirmation_code:
             refresh = RefreshToken.for_user(user)
+            user.confirmation_code = ' '
+            user.save()
             return Response(
                 str(refresh.access_token), status=status.HTTP_200_OK
             )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     except ValidationError as error:
         raise ValidationError(error)
-
-    except Exception as error:
-        print(f'Отсутствуют обязательные поля для запроса токена: {error}!')
-
-
-
-# @api_view(['POST'])
-# def get_token(request):
-#     """Выдача токена в ответ на код подтверждения и юзернейм."""
-#     serializer = TokenSerializer(data=request.data)
-#     if serializer.is_valid(raise_exception=True):
-#         username = serializer.validated_data['username']
-#         confirmation_code = serializer.validated_data['confirmation_code']
-#         user = get_object_or_404(User, username=username)
-#         if user and user.confirmation_code == confirmation_code:
-#             refresh = RefreshToken.for_user(user)
-#             return Response(
-#                 str(refresh.access_token), status=status.HTTP_200_OK
-#             )
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -172,7 +156,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_patch_users_me(self, request):
         user = User.objects.get(username=self.request.user)
         if request.method == 'PATCH':
-            user = User.objects.get(username=self.request.user)
             serializer = UserSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()

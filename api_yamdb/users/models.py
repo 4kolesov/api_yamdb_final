@@ -2,7 +2,10 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+# from .validators import CorrectUsernameAndNotMe
 
+
+# class User(AbstractUser, CorrectUsernameAndNotMe):
 class User(AbstractUser):
 
     bio = models.TextField(
@@ -25,6 +28,7 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ('date_joined',)
+
 
     @property
     def is_admin(self):
