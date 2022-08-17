@@ -3,6 +3,7 @@ from datetime import date
 
 
 class MaxYear:
+    """Проверка года не выше текущего."""
     message = 'Год выпуска не может быть больше текущего'
 
     def __init__(self, field, message=None):
