@@ -9,3 +9,4 @@ def generate_confirmation_code():
 def regex_test(value):
     if re.match('^[a-zA-Z0-9.@+-]+$', value):
         return True
+    return False

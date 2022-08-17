@@ -1,5 +1,6 @@
-from rest_framework.validators import ValidationError
 from datetime import date
+
+from rest_framework.validators import ValidationError
 
 
 class MaxYear:

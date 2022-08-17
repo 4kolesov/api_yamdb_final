@@ -1,9 +1,10 @@
-from django.db import models
 from datetime import date
+
+from django.conf import settings
 from django.core.validators import MaxValueValidator
+from django.db import models
 
 from users.models import User
-
 
 
 def year_max():
@@ -13,11 +14,12 @@ def year_max():
 class CGAbstract(models.Model):
     name = models.CharField(
         'Название',
-        max_length=256
+        max_length=settings.MAX_CG_NAME_LENGTH
     )
     slug = models.SlugField(
         'Slug',
-        unique=True
+        unique=True,
+        max_length=settings.MAX_CG_SLUG_LENGTH
     )
 
     class Meta:
@@ -43,13 +45,12 @@ class Category(CGAbstract):
 class Title(models.Model):
     name = models.CharField(
         'Название',
-        max_length=250,
+        max_length=settings.MAX_TITLE_NAME_LENGTH,
     )
     year = models.PositiveSmallIntegerField(
         'Год создания',
         db_index=True,
-        validators=(MaxValueValidator(limit_value=year_max, message={'year': 'Просто убедитесь'}),),
-        error_messages={'year': 'Просто убедитесь'}
+        validators=(MaxValueValidator(limit_value=year_max),)
     )
     description = models.TextField(
         'Описание',

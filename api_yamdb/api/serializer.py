@@ -1,18 +1,13 @@
-import datetime
-
-from django.conf import settings
 from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from reviews.validators import MaxYear
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.validators import MaxYear
 
 from .fields import (ToSerializerInSlugManyRelatedField,
                      ToSerializerInSlugRelatedField)
-
-from users.utils import regex_test
 
 
 class SignUpSerializer(serializers.Serializer):

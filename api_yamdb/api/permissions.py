@@ -21,7 +21,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         """Этот метод не лишний. Лишний тут был has_object_permission"""
         return (request.method in permissions.SAFE_METHODS
                 or (request.user and request.user.is_authenticated
-                    and request.user.role == 'admin')
+                    and request.user.is_admin)
                 )
 
 

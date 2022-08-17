@@ -1,16 +1,15 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db.models import Avg
 
 from api.permissions import (AdminGetOrEditUsers, IsAdminOrReadOnly,
                              ReviewAndCommentsPermission)
@@ -43,14 +42,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет модели произведений."""
     serializer_class = TitleSerializer
     http_method_names = ('get', 'post', 'patch', 'delete')
-    """В доках нет упоминания PUT запроса. Значит его не поддерживаем."""
+    # В доках нет упоминания PUT запроса. Значит его не поддерживаем.
     permission_classes = (IsAdminOrReadOnly,)
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
     ).order_by('name')
     filter_backends = (DjangoFilterBackend,)
-    """Фильтр используется только в данном вьюсете. 
-    Есть смысл выносить в сеттинг для всех?"""
+    # Фильтр используется только в данном вьюсете.
+    # Есть смысл выносить в сеттинг для всех?
     filterset_class = TitleFilter
 
 
