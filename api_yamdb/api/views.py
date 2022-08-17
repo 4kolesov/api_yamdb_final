@@ -116,8 +116,7 @@ def signup_user(request):
 def get_token(request):
     """Выдача токена в ответ на код подтверждения и юзернейм."""
     serializer = TokenSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    try:
+    if serializer.is_valid(raise_exception=True):
         username = serializer.validated_data['username']
         confirmation_code = serializer.validated_data['confirmation_code']
         user = get_object_or_404(User, username=username)
@@ -126,28 +125,7 @@ def get_token(request):
             return Response(
                 str(refresh.access_token), status=status.HTTP_200_OK
             )
-    except ValidationError as error:
-        raise ValidationError(error)
-
-    except Exception as error:
-        print(f'Отсутствуют обязательные поля для запроса токена: {error}!')
-
-
-
-# @api_view(['POST'])
-# def get_token(request):
-#     """Выдача токена в ответ на код подтверждения и юзернейм."""
-#     serializer = TokenSerializer(data=request.data)
-#     if serializer.is_valid(raise_exception=True):
-#         username = serializer.validated_data['username']
-#         confirmation_code = serializer.validated_data['confirmation_code']
-#         user = get_object_or_404(User, username=username)
-#         if user and user.confirmation_code == confirmation_code:
-#             refresh = RefreshToken.for_user(user)
-#             return Response(
-#                 str(refresh.access_token), status=status.HTTP_200_OK
-#             )
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
