@@ -29,7 +29,6 @@ class User(AbstractUser):
     class Meta:
         ordering = ('date_joined',)
 
-
     @property
     def is_admin(self):
         return self.role == 'admin' or self.is_staff or self.is_superuser
