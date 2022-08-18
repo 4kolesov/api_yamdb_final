@@ -2,7 +2,10 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+# from .validators import CorrectUsernameAndNotMe
 
+
+# class User(AbstractUser, CorrectUsernameAndNotMe):
 class User(AbstractUser):
 
     bio = models.TextField(
@@ -11,8 +14,8 @@ class User(AbstractUser):
     )
     role = models.CharField(
         'Роль',
-        max_length=16,
-        default=settings.DEFAUL_USER_ROLE,
+        max_length=max(len(role) for role, show in settings.ROLES_CHOICES),
+        default=settings.DEFAULT_USER_ROLE,
         choices=settings.ROLES_CHOICES,
     )
     confirmation_code = models.CharField(
@@ -25,6 +28,7 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ('date_joined',)
+
 
     @property
     def is_admin(self):

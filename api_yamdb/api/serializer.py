@@ -1,17 +1,18 @@
+import datetime
+
+from django.db.models import Avg
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from reviews.validators import MaxYear
+from reviews.validators import MaxYear, CorrectUsernameAndNotMe
 
 from .fields import (ToSerializerInSlugManyRelatedField,
                      ToSerializerInSlugRelatedField)
 
 
-class SignUpSerializer(serializers.Serializer):
+class SignUpSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
     email = serializers.EmailField(
         validators=[UniqueValidator(
             queryset=User.objects.all(),
@@ -21,12 +22,10 @@ class SignUpSerializer(serializers.Serializer):
     )
     username = serializers.CharField(
         validators=[
-            RegexValidator(
-                regex='^[a-zA-Z0-9.@+-_]+$',
-            ),
+            CorrectUsernameAndNotMe(field='username'),
             UniqueValidator(
                 queryset=User.objects.all(),
-                message='Username должен быть уникальный!'),
+                message='Username должен быть уникальный!')
         ],
         required=True,
         max_length=150
@@ -36,21 +35,10 @@ class SignUpSerializer(serializers.Serializer):
         model = User
         fields = ('email', 'username')
 
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Username не может быть "me"'
-            )
-        return value
 
-
-class TokenSerializer(serializers.Serializer):
+class TokenSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
     username = serializers.CharField(
-        validators=[
-            RegexValidator(
-                regex='^[a-zA-Z0-9.@+-_]+$',
-            ),
-        ],
+        validators=[CorrectUsernameAndNotMe(field='username')],
         required=True,
         write_only=True,
         max_length=150
@@ -59,11 +47,14 @@ class TokenSerializer(serializers.Serializer):
         required=True, write_only=True, max_length=5)
 
 
-class AdminSerializer(serializers.ModelSerializer):
+class AdminSerializer(serializers.ModelSerializer, CorrectUsernameAndNotMe):
     username = serializers.CharField(
-        validators=[UniqueValidator(
-            queryset=User.objects.all(),
-            message='Username должен быть уникальный!')],
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='Username должен быть уникальный!'),
+            CorrectUsernameAndNotMe(field='username')
+        ],
         required=True,
         max_length=150
     )

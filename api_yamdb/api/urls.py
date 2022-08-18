@@ -28,6 +28,11 @@ auth = [
     path('signup/', signup_user, name='signup')
 ]
 
+auth = [
+    path('signup/', signup_user, name='signup'),
+    path('token/', get_token, name='token')
+]
+
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
     path('v1/auth/', include(auth))
