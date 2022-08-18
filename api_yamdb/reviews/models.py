@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from .validators import max_year
 from users.models import User
 
 
@@ -50,7 +51,7 @@ class Title(models.Model):
     year = models.PositiveSmallIntegerField(
         'Год создания',
         db_index=True,
-        validators=(MaxValueValidator(limit_value=year_max),)
+        validators=(max_year,)
     )
     description = models.TextField(
         'Описание',

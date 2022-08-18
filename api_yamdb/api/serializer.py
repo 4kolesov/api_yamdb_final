@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from reviews.validators import MaxYear
+from reviews.validators import max_year
 from users.validators import CorrectUsernameAndNotMe
 
 from .fields import (ToSerializerInSlugManyRelatedField,
@@ -104,6 +104,7 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all()
     )
+    # Не повтор. 404 не будет. Фиелд переделал.
     category = ToSerializerInSlugRelatedField(
         serializer=CategorySerializer,
         slug_field='slug',
@@ -115,7 +116,7 @@ class TitleSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
         model = Title
-        validators = (MaxYear(field='year'),)
+        validators = (max_year,)
 
 
 class ReviewSerializer(serializers.ModelSerializer):

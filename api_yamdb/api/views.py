@@ -8,7 +8,6 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -42,16 +41,12 @@ class GenreViewSet(ListCreateDeleteViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет модели произведений."""
     serializer_class = TitleSerializer
-    http_method_names = ('get', 'post', 'patch', 'delete')
-    # В доках нет упоминания PUT запроса. Значит его не поддерживаем.
     permission_classes = (IsAdminOrReadOnly,)
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')
-    ).order_by('name')
-    filter_backends = (DjangoFilterBackend,)
-    # Фильтр используется только в данном вьюсете.
-    # Есть смысл выносить в сеттинг для всех?
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     filterset_class = TitleFilter
+
+    def get_queryset(self):
+        return self.queryset.order_by('name')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -131,7 +126,6 @@ class UserViewSet(viewsets.ModelViewSet):
     """Юзеры для админа + детали и редактирование о себе."""
     queryset = User.objects.all()
     serializer_class = AdminSerializer
-    pagination_class = PageNumberPagination
     permission_classes = (
         AdminGetOrEditUsers,
     )
