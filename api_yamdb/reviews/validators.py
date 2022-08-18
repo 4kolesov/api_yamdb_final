@@ -12,5 +12,6 @@ class MaxYear:
         self.message = message or self.message
 
     def __call__(self, value):
-        if value[self.field] > date.today().year:
+        year = value.get(self.field)
+        if year and (year > date.today().year):
             raise ValidationError({self.field: self.message})

@@ -1,11 +1,10 @@
 from datetime import date
 
 from django.conf import settings
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from users.models import User
-from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 def year_max():
@@ -84,10 +83,6 @@ class Title(models.Model):
 
 class CRAbstract(models.Model):
     """Абстрактная модель для комменатриев и ревью."""
-    class Meta:
-        abstract = True
-        ordering = ('-pub_date',)
-
     text = models.TextField('Текст')
     pub_date = models.DateTimeField(
         'Дата добавления',
@@ -95,10 +90,14 @@ class CRAbstract(models.Model):
     )
     author = models.ForeignKey(
         User,
-        verbose_name='Автор комментария',
+        verbose_name='Автор',
         related_name='%(class)s',
         on_delete=models.CASCADE
     )
+
+    class Meta:
+        abstract = True
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.text[:10]
@@ -121,7 +120,7 @@ class Review(CRAbstract):
         error_messages={'validators': 'Оценка от 1 до 10!'}
     )
 
-    class Meta:
+    class Meta(CRAbstract.Meta):
         verbose_name = 'Оценка'
         verbose_name_plural = 'Оценки'
         constraints = [
@@ -140,6 +139,6 @@ class Comment(CRAbstract):
         on_delete=models.CASCADE
     )
 
-    class Meta:
+    class Meta(CRAbstract.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'

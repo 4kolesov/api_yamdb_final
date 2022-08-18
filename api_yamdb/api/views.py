@@ -11,8 +11,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.permissions import (AdminGetOrEditUsers, IsAdminOrReadOnly,
-                             ForAuthorAdminModerator)
+from api.permissions import (AdminGetOrEditUsers, ForAuthorAdminModerator,
+                             IsAdminOrReadOnly)
 from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
 
