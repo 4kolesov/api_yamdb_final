@@ -92,13 +92,13 @@ class CRAbstract(models.Model):
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
-        related_name='%(class)s',
         on_delete=models.CASCADE
     )
 
     class Meta:
         abstract = True
         ordering = ('-pub_date',)
+        default_related_name = '%(class)s'
 
     def __str__(self):
         return self.text[:10]
