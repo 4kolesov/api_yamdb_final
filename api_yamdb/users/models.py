@@ -14,8 +14,8 @@ class User(AbstractUser):
     )
     role = models.CharField(
         'Роль',
-        max_length=16,
-        default=settings.DEFAUL_USER_ROLE,
+        max_length=max(len(role) for role, show in settings.ROLES_CHOICES),
+        default=settings.DEFAULT_USER_ROLE,
         choices=settings.ROLES_CHOICES,
     )
     confirmation_code = models.CharField(
