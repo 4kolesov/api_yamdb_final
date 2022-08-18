@@ -4,7 +4,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from reviews.validators import CorrectUsernameAndNotMe, MaxYear
+from reviews.validators import MaxYear
+from users.validators import CorrectUsernameAndNotMe
 
 from .fields import (ToSerializerInSlugManyRelatedField,
                      ToSerializerInSlugRelatedField)
