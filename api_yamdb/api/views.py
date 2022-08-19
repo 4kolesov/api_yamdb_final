@@ -96,7 +96,7 @@ def signup_user(request):
             confirmation_code=confirmation_code
         )
     except IntegrityError as error:
-        raise ValidationError({error})
+        raise ValidationError(error)
     message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
     send_mail(
         'Верификация YaMDB', message, settings.ADMIN_EMAIL, [user.email]
