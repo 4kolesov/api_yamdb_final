@@ -13,18 +13,10 @@ from .fields import (ToSerializerInSlugManyRelatedField,
 
 class SignUpSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
     email = serializers.EmailField(
-        validators=[UniqueValidator(
-            queryset=User.objects.all(),
-            message='Email должен быть уникальный!')],
         required=True,
         max_length=254
     )
     username = serializers.CharField(
-        validators=[
-            UniqueValidator(
-                queryset=User.objects.all(),
-                message='Username должен быть уникальный!')
-        ],
         required=True,
         max_length=150
     )
