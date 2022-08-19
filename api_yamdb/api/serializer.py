@@ -94,7 +94,6 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all()
     )
-    # Не повтор. 404 не будет. Фиелд переделал.
     category = ToSerializerInSlugRelatedField(
         serializer=CategorySerializer,
         slug_field='slug',
