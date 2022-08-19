@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class ForAuthorAdminModerator(permissions.BasePermission):
+class IsAuthorAdminModerator(permissions.BasePermission):
 
     def has_permission(self, request, view):
         self.message = 'Необходимо авторизоваться'

@@ -7,6 +7,7 @@ from rest_framework.validators import ValidationError
 def regex_test(value):
     if re.match('^[a-zA-Z0-9.@+-_]+$', value):
         return True
+    return True
 
 
 class CorrectUsernameAndNotMe:

@@ -4,7 +4,6 @@ from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
@@ -12,8 +11,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.permissions import (AdminGetOrEdit, ForAuthorAdminModerator,
-                             IsAdminOrReadOnly)
+from api.permissions import (AdminGetOrEdit, IsAdminOrReadOnly,
+                             IsAuthorAdminModerator)
 from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
 
@@ -42,22 +41,18 @@ class GenreViewSet(ListCreateDeleteViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет модели произведений."""
     serializer_class = TitleSerializer
-    http_method_names = ('get', 'post', 'patch', 'delete')
-    # В доках нет упоминания PUT запроса. Значит его не поддерживаем.
     permission_classes = (IsAdminOrReadOnly,)
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')
-    ).order_by('name')
-    filter_backends = (DjangoFilterBackend,)
-    # Фильтр используется только в данном вьюсете.
-    # Есть смысл выносить в сеттинг для всех?
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     filterset_class = TitleFilter
+
+    def get_queryset(self):
+        return self.queryset.order_by('name')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели отзывов."""
     serializer_class = ReviewSerializer
-    permission_classes = (ForAuthorAdminModerator,)
+    permission_classes = (IsAuthorAdminModerator,)
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -72,7 +67,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели комментариев."""
     serializer_class = CommentSerializer
-    permission_classes = (ForAuthorAdminModerator,)
+    permission_classes = (IsAuthorAdminModerator,)
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))

@@ -6,6 +6,8 @@ from django.db import models
 
 from users.models import User
 
+from .validators import max_year
+
 
 def year_max():
     return date.today().year
@@ -50,7 +52,7 @@ class Title(models.Model):
     year = models.PositiveSmallIntegerField(
         'Год создания',
         db_index=True,
-        validators=(MaxValueValidator(limit_value=year_max),)
+        validators=(max_year,)
     )
     description = models.TextField(
         'Описание',
@@ -91,13 +93,13 @@ class CRAbstract(models.Model):
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
-        related_name='%(class)s',
         on_delete=models.CASCADE
     )
 
     class Meta:
         abstract = True
         ordering = ('-pub_date',)
+        default_related_name = '%(class)s'
 
     def __str__(self):
         return self.text[:10]
@@ -113,6 +115,7 @@ class Review(CRAbstract):
     )
     score = models.PositiveSmallIntegerField(
         'Оценка',
+        default=1,
         validators=(
             MinValueValidator(1),
             MaxValueValidator(10)
