@@ -1,5 +1,5 @@
-from datetime import date
 import collections
+from datetime import date
 
 from rest_framework.validators import ValidationError
 

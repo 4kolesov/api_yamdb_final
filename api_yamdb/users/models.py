@@ -40,9 +40,6 @@ class User(AbstractUser, CorrectUsernameAndNotMe):
 
     class Meta:
         ordering = ('date_joined',)
-        # constraints = [
-        #     models.UniqueConstraint(fields=['username', 'email'], name='unique_name_owner')
-        # ]
 
     @property
     def is_admin(self):

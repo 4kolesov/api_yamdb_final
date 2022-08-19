@@ -4,8 +4,9 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import max_year
 from users.models import User
+
+from .validators import max_year
 
 
 def year_max():

@@ -10,8 +10,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.permissions import (AdminGetOrEdit, IsAuthorAdminModerator,
-                             IsAdminOrReadOnly)
+from api.permissions import (AdminGetOrEdit, IsAdminOrReadOnly,
+                             IsAuthorAdminModerator)
 from reviews.models import Category, Genre, Review, Title, User
 from users.utils import generate_confirmation_code
 
