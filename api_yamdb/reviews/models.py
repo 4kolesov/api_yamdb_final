@@ -99,7 +99,6 @@ class CRAbstract(models.Model):
     class Meta:
         abstract = True
         ordering = ('-pub_date',)
-        default_related_name = '%(class)s'
 
     def __str__(self):
         return self.text[:10]
@@ -110,7 +109,6 @@ class Review(CRAbstract):
     title = models.ForeignKey(
         'Title',
         verbose_name='Произведение',
-        related_name='reviews',
         on_delete=models.CASCADE
     )
     score = models.PositiveSmallIntegerField(
@@ -126,6 +124,7 @@ class Review(CRAbstract):
     class Meta(CRAbstract.Meta):
         verbose_name = 'Оценка'
         verbose_name_plural = 'Оценки'
+        default_related_name = 'reviews'
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
@@ -138,10 +137,10 @@ class Comment(CRAbstract):
     review = models.ForeignKey(
         'Review',
         verbose_name='Ревью',
-        related_name='comments',
         on_delete=models.CASCADE
     )
 
     class Meta(CRAbstract.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        default_related_name = 'comments'

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -93,7 +94,6 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all()
     )
-    # Не повтор. 404 не будет. Фиелд переделал.
     category = ToSerializerInSlugRelatedField(
         serializer=CategorySerializer,
         slug_field='slug',
@@ -113,7 +113,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True
     )
-    score = serializers.IntegerField(min_value=0, max_value=10)
+    score = serializers.IntegerField(
+        validators=(
+            MinValueValidator(1),
+            MaxValueValidator(10)
+        ),
+        error_messages={'validators': 'Оценка от 1 до 10!'}
+    )
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
