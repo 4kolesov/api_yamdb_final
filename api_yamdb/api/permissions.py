@@ -28,7 +28,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
                 )
 
 
-class AdminGetOrEditUsers(permissions.BasePermission):
+class AdminGetOrEdit(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_admin

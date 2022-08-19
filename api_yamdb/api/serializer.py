@@ -21,7 +21,6 @@ class SignUpSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
     )
     username = serializers.CharField(
         validators=[
-            CorrectUsernameAndNotMe(field='username'),
             UniqueValidator(
                 queryset=User.objects.all(),
                 message='Username должен быть уникальный!')
@@ -37,7 +36,6 @@ class SignUpSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
 
 class TokenSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
     username = serializers.CharField(
-        validators=[CorrectUsernameAndNotMe(field='username')],
         required=True,
         write_only=True,
         max_length=150
@@ -52,7 +50,6 @@ class AdminSerializer(serializers.ModelSerializer, CorrectUsernameAndNotMe):
             UniqueValidator(
                 queryset=User.objects.all(),
                 message='Username должен быть уникальный!'),
-            CorrectUsernameAndNotMe(field='username')
         ],
         required=True,
         max_length=150
