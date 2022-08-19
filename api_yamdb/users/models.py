@@ -10,6 +10,7 @@ class User(AbstractUser, CorrectUsernameAndNotMe):
     ADMIN = 'admin'
     EMAIL = 'Почта'
     ROLE = 'Роль'
+    BIO = 'Биография'
 
     ROLES_CHOICES = (
         (USER, 'Пользователь'),
@@ -20,7 +21,7 @@ class User(AbstractUser, CorrectUsernameAndNotMe):
     DEFAULT_USER_ROLE = USER
 
     bio = models.TextField(
-        'Биография',
+        BIO,
         blank=True,
     )
     role = models.CharField(
