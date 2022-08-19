@@ -140,10 +140,9 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def get_patch_users_me(self, request):
         user = User.objects.get(username=self.request.user)
+        serializer = UserSerializer(user)
         if request.method == 'PATCH':
             serializer = UserSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data)
-        serializer = UserSerializer(user)
         return Response(serializer.data)
