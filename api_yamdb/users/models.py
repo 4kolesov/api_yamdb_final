@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from validators import CorrectUsernameAndNotMe
+from users.validators import CorrectUsernameAndNotMe
 
 
 class User(AbstractUser, CorrectUsernameAndNotMe):
@@ -40,6 +40,9 @@ class User(AbstractUser, CorrectUsernameAndNotMe):
 
     class Meta:
         ordering = ('date_joined',)
+        # constraints = [
+        #     models.UniqueConstraint(fields=['username', 'email'], name='unique_name_owner')
+        # ]
 
     @property
     def is_admin(self):
