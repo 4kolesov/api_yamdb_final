@@ -114,6 +114,7 @@ class Review(CRAbstract):
     )
     score = models.PositiveSmallIntegerField(
         'Оценка',
+        default=1,
         validators=(
             MinValueValidator(1),
             MaxValueValidator(10)
