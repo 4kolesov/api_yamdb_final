@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -88,6 +89,7 @@ def signup_user(request):
     """Регистрация пользователя, генерирование и отправка код подтверждения."""
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data['username']
     try:
         confirmation_code = str(generate_confirmation_code())
         user, stat = User.objects.get_or_create(
@@ -95,7 +97,7 @@ def signup_user(request):
             confirmation_code=confirmation_code
         )
     except IntegrityError as error:
-        raise (f'Такой username или email уже заняты: {error}!')
+        raise ValidationError
     message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
     send_mail(
         'Верификация YaMDB', message, settings.ADMIN_EMAIL, [user.email]
