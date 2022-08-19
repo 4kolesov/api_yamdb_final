@@ -89,14 +89,13 @@ def signup_user(request):
     """Регистрация пользователя, генерирование и отправка код подтверждения."""
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.validated_data['username']
     try:
         confirmation_code = str(generate_confirmation_code())
         user, stat = User.objects.get_or_create(
             **serializer.validated_data,
             confirmation_code=confirmation_code
         )
-    except IntegrityError as error:
+    except IntegrityError:
         raise ValidationError
     message = f'Ваш код авторизации {confirmation_code}. Наслаждайтесь!'
     send_mail(
