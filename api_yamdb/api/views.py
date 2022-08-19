@@ -44,8 +44,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     filterset_class = TitleFilter
-    ordering_fields = ['name']
-    ordering = ['name']
+    ordering = ('name',)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
