@@ -16,15 +16,3 @@ class ListCreateDeleteViewSet(
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     permission_classes = (IsAdminOrReadOnly,)
-
-
-class CreateViewSet(mixins.CreateModelMixin, GenericViewSet):
-    """Только создание объектов."""
-    pass
-
-
-class UpdateRetrieveViewSet(mixins.RetrieveModelMixin,
-                            mixins.UpdateModelMixin,
-                            GenericViewSet):
-    """Получение одного экземпляра и его изменение"""
-    pass
