@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
 
 from users.validators import CorrectUsernameAndNotMe
 
@@ -31,7 +33,7 @@ class User(AbstractUser, CorrectUsernameAndNotMe):
         choices=ROLES_CHOICES,
     )
     confirmation_code = models.CharField(
-        max_length=256
+        max_length=settings.MAX_CC_NAME_LENGTH
     )
     email = models.EmailField(
         EMAIL,
