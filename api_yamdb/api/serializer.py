@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
+import settings
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from reviews.validators import max_year
 from users.validators import CorrectUsernameAndNotMe
@@ -14,11 +15,11 @@ from .fields import (ToSerializerInSlugManyRelatedField,
 class SignUpSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
     email = serializers.EmailField(
         required=True,
-        max_length=254
+        max_length=settings.MAX_EMAIL_NAME_LENGTH
     )
     username = serializers.CharField(
         required=True,
-        max_length=150
+        max_length=settings.MAX_USERNAME_NAME_LENGTH
     )
 
     class Meta:
@@ -30,10 +31,10 @@ class TokenSerializer(serializers.Serializer, CorrectUsernameAndNotMe):
     username = serializers.CharField(
         required=True,
         write_only=True,
-        max_length=150
+        max_length=settings.MAX_USERNAME_NAME_LENGTH
     )
     confirmation_code = serializers.CharField(
-        required=True, write_only=True, max_length=5)
+        required=True, write_only=True, max_length=settings.MAX_CC_NAME_LENGTH)
 
 
 class AdminSerializer(serializers.ModelSerializer, CorrectUsernameAndNotMe):
@@ -44,14 +45,14 @@ class AdminSerializer(serializers.ModelSerializer, CorrectUsernameAndNotMe):
                 message='Username должен быть уникальный!'),
         ],
         required=True,
-        max_length=150
+        max_length=settings.MAX_USERNAME_NAME_LENGTH
     )
     email = serializers.EmailField(
         validators=[UniqueValidator(
             queryset=User.objects.all(),
             message='Email должен быть уникальный!')],
         required=True,
-        max_length=254
+        max_length=settings.MAX_EMAIL_NAME_LENGTH
     )
 
     class Meta:
