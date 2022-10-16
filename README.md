@@ -63,7 +63,6 @@ python manage.py loadcsv
 python manage.py loadcsv --clear_base --only_err_msg
 ```
 
-```
 
 ### Авторы проекта:
 Мария Постолова — Отзывы, Комментарии, эндпоинты, разрешения.
